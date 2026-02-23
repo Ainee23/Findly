@@ -121,5 +121,5 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'core.User'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/core/signup/'
+LOGIN_REDIRECT_URL = '/core/dashboard/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
