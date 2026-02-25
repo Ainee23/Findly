@@ -1,38 +1,44 @@
 {% extends "base.html" %}
-{% block title %}Dashboard | Findly{% endblock %}
+{% block title %}User Dashboard | Findly{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="form-card">
-            <h2 class="fw-bold">Welcome, {{ user.email }}</h2>
-            <p class="text-muted">Role: {{ user.role }}</p>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Welcome, {{ request.user.username }}</h2>
 
-            <hr>
-
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="p-3 border rounded text-center">
-                        <h5>My Profile</h5>
-                        <p class="text-muted">View & update profile</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="p-3 border rounded text-center">
-                        <h5>My Reports</h5>
-                        <p class="text-muted">Lost & found items</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="p-3 border rounded text-center">
-                        <h5>Settings</h5>
-                        <p class="text-muted">Account preferences</p>
-                    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Profile</h5>
+                    <p class="card-text">View or update your profile information.</p>
+                    <a href="#" class="btn btn-primary w-100">Go</a>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text">Check your orders and order history.</p>
+                    <a href="#" class="btn btn-success w-100">View Orders</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Settings</h5>
+                    <p class="card-text">Change your password or account settings.</p>
+                    <a href="#" class="btn btn-warning w-100">Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
     </div>
 </div>
 {% endblock %}

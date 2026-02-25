@@ -121,5 +121,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'core.User'
-LOGIN_REDIRECT_URL = '/core/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+# Redirect after login
+LOGIN_REDIRECT_URL = 'dashboard'      # after login, goes to dashboard
+LOGOUT_REDIRECT_URL = 'login'         # after logout, goes to login
+LOGIN_URL = 'login'                    # login URL for @login_required

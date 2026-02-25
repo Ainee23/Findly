@@ -1,9 +1,10 @@
-from django.contrib import admin
-from django.urls import path,include
-from . import views
+from django.urls import path
+from .views import usersignupView, userloginView, userlogoutView, dashboardView, homeView
 
 urlpatterns = [
-    path('dashboard/', views.dashboard_redirect, name='dashboard'),
-    path('user-dashboard/', views.user_dashboard, name='user_dashboard'),
-    path('signup/',views.usersignupView,name='signup')
+    path('signup/', usersignupView, name='signup'),
+    path('login/', userloginView, name='login'),
+    path('logout/', userlogoutView, name='logout'),
+    path('dashboard/', dashboardView, name='dashboard'),  # only one dashboard path
+    path('', homeView, name='home'),  # home page
 ]

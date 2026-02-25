@@ -1,12 +1,16 @@
-from django.contrib.auth.forms import UserCreationForm
-from .models import User
-from django import forms
+# core/views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from .forms import UserSignupForm  # <-- Add this import
 
-class UserSignupForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ['email','role','password1','password2']
-        widgets = {
-            'password1':forms.PasswordInput(),
-            'password2':forms.PasswordInput(),
-        }
+def usersignupView(request):
+    if request.method == 'POST':
+        form = UserSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('dashboard')
+    else:
+        form = UserSignupForm()
+    
+    return render(request, 'core/signup.html', {'form': form})
