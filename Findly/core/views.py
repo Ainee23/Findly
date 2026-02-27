@@ -1,66 +1,116 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 
 User = get_user_model()
 
-def usersignupView(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        password2 = request.POST.get('password2')
+def homeView(request):
+    return render(request, "core/home.html")
 
-        # Basic validation
-        if not email or not password or not password2:
-            error = "All fields are required."
-            return render(request, 'core/signup.html', {'error': error})
+# ==============================
+# SIGNUP VIEW
+# ==============================
+def usersignupView(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        password2 = request.POST.get("password2")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        gender = request.POST.get("gender")
+        mobile = request.POST.get("mobile")
 
         if password != password2:
-            error = "Passwords do not match."
-            return render(request, 'core/signup.html', {'error': error})
+            return render(request, "core/signup.html", {
+                "error": "Passwords do not match"
+            })
 
         if User.objects.filter(email=email).exists():
-            error = "Email is already registered."
-            return render(request, 'core/signup.html', {'error': error})
+            return render(request, "core/signup.html", {
+                "error": "Email already exists"
+            })
 
-        # Create user
-        user = User.objects.create_user(email=email, password=password)
+        # Default role = user
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            gender=gender,
+            mobile=mobile,
+            role="user"   # 👈 important
+        )
+
         login(request, user)
-        return redirect('dashboard')
 
-    return render(request, 'core/signup.html')
+        # Redirect based on role
+        if user.role == "owner":
+            return redirect("admin_dashboard")
+        return redirect("user_dashboard")
 
+    return render(request, "core/signup.html")
+
+
+# ==============================
+# LOGIN VIEW
+# ==============================
 def userloginView(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
 
-        user = authenticate(request, email=email, password=password)  # email auth
+        user = authenticate(request, email=email, password=password)
+
         if user is not None:
             login(request, user)
-            return redirect('dashboard')
-        else:
-            return render(request, 'core/login.html', {'error': "Invalid credentials"})
-    return render(request, 'core/login.html')
 
+            # Redirect based on role
+            if user.role == "owner":
+                return redirect("admin_dashboard")
+            return redirect("user_dashboard")
+
+        return render(request, "core/login.html", {
+            "error": "Invalid credentials"
+        })
+
+    return render(request, "core/login.html")
+
+
+# ==============================
+# LOGOUT VIEW
+# ==============================
 def userlogoutView(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
 
 
-def homeView(request):
-    return render(request, 'core/home.html')
+# ==============================
+# USER DASHBOARD
+# ==============================
+@login_required
+def user_dashboard(request):
+    if request.user.role != "user":
+        raise PermissionDenied
+    return render(request, "core/user_dashboard.html")
 
+
+# ==============================
+# OWNER DASHBOARD
+# ==============================
+@login_required
+def owner_dashboard(request):
+    if request.user.role != "owner":
+        raise PermissionDenied
+    return render(request, "core/admin_dashboard.html")
+
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def dashboardView(request):
-    user = request.user
-
-    if getattr(user, 'is_admin', False):  # check admin
-        # Render admin dashboard
-        return render(request, 'core/admin_dashboard.html')
+    if request.user.role == "owner":
+        return redirect("admin_dashboard")
     else:
-        # Render user dashboard
-        return render(request, 'core/user_dashboard.html')
+        return redirect("user_dashboard")
