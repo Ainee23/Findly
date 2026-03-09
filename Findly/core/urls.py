@@ -1,25 +1,13 @@
 from django.urls import path
-from .views import (
-    usersignupView,
-    userloginView,
-    userlogoutView,
-    user_dashboard,
-    owner_dashboard,
-    dashboardView,   # ✅ ADD THIS
-    homeView,
-)
+from . import views
 
 urlpatterns = [
-    path('', homeView, name='home'),
-
-    path('signup/', usersignupView, name='signup'),
-    path('login/', userloginView, name='login'),
-    path('logout/', userlogoutView, name='logout'),
-
-    # ✅ MAIN DASHBOARD (recommended)
-    path('dashboard/', dashboardView, name='dashboard'),
-
-    # Optional: separate dashboards
-    path('dashboard/user/', user_dashboard, name='user_dashboard'),
-    path('dashboard/owner/', owner_dashboard, name='admin_dashboard'),
+    path("", views.homeView, name="home"),
+    path("dashboard/", views.dashboardView, name="dashboard"),
+    path("owner/dashboard/", views.owner_dashboard, name="admin_dashboard"),
+    path("user/dashboard/", views.user_dashboard, name="user_dashboard"),
+    path("owner/create-place/", views.createPlace, name="create_place"),
+    path("signup/", views.usersignupView, name="signup"),
+    path("login/", views.userloginView, name="login"),
+    path("logout/", views.userlogoutView, name="logout"),
 ]

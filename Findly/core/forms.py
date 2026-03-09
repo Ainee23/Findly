@@ -1,16 +1,40 @@
-# core/views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import UserSignupForm  # <-- Add this import
+from django import forms
+from django.contrib.auth import get_user_model
+from .models import FindlyPlace
 
-def usersignupView(request):
-    if request.method == 'POST':
-        form = UserSignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('dashboard')
-    else:
-        form = UserSignupForm()
-    
-    return render(request, 'core/signup.html', {'form': form})
+User = get_user_model()
+
+
+# ==========================
+# USER FORM
+# ==========================
+class UserForm(forms.ModelForm):
+
+    password = forms.CharField(
+        widget=forms.PasswordInput()
+    )
+
+    class Meta:
+        model = User
+
+        fields = [
+            "email",
+            "password",
+            "first_name",
+            "role",
+        ]
+
+
+# ==========================
+# FINDLY PLACE FORM
+# ==========================
+class FindlyPlaceForm(forms.ModelForm):
+
+    class Meta:
+        model = FindlyPlace
+
+        fields = [
+            "name",
+            "description",
+            "placeImage",
+        ]

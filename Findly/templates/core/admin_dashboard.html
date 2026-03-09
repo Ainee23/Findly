@@ -2,72 +2,134 @@
 {% block title %}Owner Dashboard | Findly{% endblock %}
 
 {% block content %}
+
 <div class="container mt-5">
 
-    <h2 class="mb-4 text-center">
-        Owner Panel
-    </h2>
+```
+<h2 class="mb-4 text-center">
+    Owner Panel
+</h2>
 
-    <p class="text-center text-muted">
-        Welcome, {{ request.user.first_name }} {{ request.user.last_name }}
-        ({{ request.user.email }})
+<p class="text-center text-muted">
+    Welcome, {{ request.user.first_name }} {{ request.user.last_name }}
+    ({{ request.user.email }})
+</p>
+
+
+<!-- ✅ CREATE LISTING BUTTON -->
+
+<div class="text-center mb-4">
+    <a href="{% url 'create_place' %}" class="btn btn-primary">
+        Create Listing
+    </a>
+</div>
+
+
+
+<!-- ✅ OLD CARDS (kept same) -->
+
+<div class="row mt-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Manage Users</h5>
+                <p class="card-text">
+                    Add, edit, or remove users from the system.
+                </p>
+                <a href="#" class="btn btn-primary w-100">Manage</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Manage Products</h5>
+                <p class="card-text">
+                    Add, edit, or remove products.
+                </p>
+                <a href="#" class="btn btn-success w-100">Products</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="card-text">
+                    View all orders placed by users.
+                </p>
+                <a href="#" class="btn btn-warning w-100">View Orders</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Reports</h5>
+                <p class="card-text">
+                    Generate sales and user activity reports.
+                </p>
+                <a href="#" class="btn btn-info w-100">Reports</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- ✅ NEW LISTINGS SECTION -->
+
+<h3 class="mt-5 mb-3 text-center">
+    Your Listings
+</h3>
+
+<div class="row">
+
+    {% for place in places %}
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm mb-3">
+
+            {% if place.placeImage %}
+            <img src="{{place.placeImage.url}}"
+                 class="card-img-top"
+                 style="height:200px;object-fit:cover;">
+            {% endif %}
+
+            <div class="card-body">
+
+                <h5>{{place.name}}</h5>
+
+                <p>{{place.description}}</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <p class="text-center">
+        No listings added yet
     </p>
 
-    <div class="row mt-4">
+    {% endfor %}
 
-        <div class="col-md-3">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Manage Users</h5>
-                    <p class="card-text">
-                        Add, edit, or remove users from the system.
-                    </p>
-                    <a href="#" class="btn btn-primary w-100">Manage</a>
-                </div>
-            </div>
-        </div>
+</div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Manage Products</h5>
-                    <p class="card-text">
-                        Add, edit, or remove products.
-                    </p>
-                    <a href="#" class="btn btn-success w-100">Products</a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Orders</h5>
-                    <p class="card-text">
-                        View all orders placed by users.
-                    </p>
-                    <a href="#" class="btn btn-warning w-100">View Orders</a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Reports</h5>
-                    <p class="card-text">
-                        Generate sales and user activity reports.
-                    </p>
-                    <a href="#" class="btn btn-info w-100">Reports</a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="text-center mt-4">
-        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
-    </div>
+<div class="text-center mt-4">
+    <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+</div>
+```
 
 </div>
 {% endblock %}

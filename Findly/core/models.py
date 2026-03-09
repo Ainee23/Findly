@@ -6,39 +6,40 @@ from django.contrib.auth.models import (
 )
 
 
-# ==============================
-# USER MANAGER
-# ==============================
+# ================= USER MANAGER =================
+
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
+
         if not email:
-            raise ValueError("Users must have an email address")
+            raise ValueError("Users must have email")
 
         email = self.normalize_email(email)
+
         extra_fields.setdefault("role", "user")
 
         user = self.model(email=email, **extra_fields)
+
         user.set_password(password)
+
         user.save(using=self._db)
+
         return user
 
+
     def create_superuser(self, email, password=None, **extra_fields):
+
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("role", "owner")
 
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
-
         return self.create_user(email, password, **extra_fields)
 
 
-# ==============================
-# CUSTOM USER MODEL
-# ==============================
+
+# ================= USER =================
+
 class User(AbstractBaseUser, PermissionsMixin):
 
     ROLE_CHOICES = (
@@ -46,29 +47,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         ("user", "User"),
     )
 
-    GENDER_CHOICES = (
-        ("male", "Male"),
-        ("female", "Female"),
-        ("other", "Other"),
-    )
-
     email = models.EmailField(unique=True)
 
     first_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100, blank=True, null=True)
-
-    gender = models.CharField(
-        max_length=10,
-        choices=GENDER_CHOICES,
-        blank=True,
-        null=True
-    )
-
-    mobile = models.CharField(
-        max_length=15,
-        blank=True,
-        null=True
-    )
 
     role = models.CharField(
         max_length=10,
@@ -77,16 +58,35 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    # 🔥 VERY IMPORTANT
     USERNAME_FIELD = "email"
+
     REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
+
+
+
+# ================= FINDLY MODEL =================
+
+class FindlyPlace(models.Model):
+
+    name = models.CharField(max_length=100)
+
+    description = models.TextField(blank=True)
+
+    placeImage = models.ImageField(
+        upload_to="findly_images/",
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

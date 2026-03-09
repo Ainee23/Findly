@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+import os
 # Application definition
 
 INSTALLED_APPS = [
@@ -125,3 +125,16 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_REDIRECT_URL = 'dashboard'      # after login, goes to dashboard
 LOGOUT_REDIRECT_URL = 'login'         # after logout, goes to login
 LOGIN_URL = 'login'                    # login URL for @login_required
+
+# ================= EMAIL CONFIG =================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'yourgmail@gmail.com'      # your real gmail
+EMAIL_HOST_PASSWORD = 'your_16_digit_app_password'  # gmail app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
