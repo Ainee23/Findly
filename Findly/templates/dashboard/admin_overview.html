@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2 class="fw-bold text-danger mb-4">
+<i class="bi bi-shield-lock"></i> Admin Dashboard
+</h2>
+
+<div class="row g-4">
+
+<div class="col-md-3">
+<div class="card shadow border-0 rounded-4 text-center p-3">
+<i class="bi bi-box fs-1 text-primary"></i>
+<h3>{{ data.total_items }}</h3>
+<p>Total Items</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow border-0 rounded-4 text-center p-3">
+<i class="bi bi-chat fs-1 text-success"></i>
+<h3>{{ data.total_messages }}</h3>
+<p>Messages</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow border-0 rounded-4 text-center p-3">
+<i class="bi bi-bell fs-1 text-warning"></i>
+<h3>{{ data.total_notifications }}</h3>
+<p>Notifications</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow border-0 rounded-4 text-center p-3">
+<i class="bi bi-star fs-1 text-danger"></i>
+<h3>{{ data.total_reviews }}</h3>
+<p>Reviews</p>
+</div>
+</div>
+
+</div>
+
+
+<div class="mt-4">
+
+<a href="{% url 'items:dashboard' %}" class="btn btn-primary">
+Manage Items
+</a>
+
+<a href="{% url 'accounts:profile' %}" class="btn btn-outline-dark">
+Profile
+</a>
+
+<a href="{% url 'accounts:settings' %}" class="btn btn-outline-secondary">
+Settings
+</a>
+
+<a href="/admin/" class="btn btn-dark">
+Backend Admin
+</a>
+
+</div>
+
+</div>
+
+{% endblock %}

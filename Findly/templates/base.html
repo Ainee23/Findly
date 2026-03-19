@@ -1,129 +1,251 @@
 {% load static %}
 {% now "Y" as current_year %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Findly{% endblock %}</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
         }
+        // Apply dark mode early to avoid flash
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .sidebar {
-            min-height: 100vh;
-            background-color: #ffffff;
-            border-right: 1px solid #dee2e6;
-            padding-top: 20px;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 10px 20px;
-            color: #212529;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .sidebar a:hover {
-            background-color: #f1f1f1;
-        }
-
-        .sidebar h5 {
-            margin-bottom: 20px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-    </style>
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="bg-[#fcfcfc] text-gray-800 dark:bg-gray-900 dark:text-gray-100 font-sans antialiased h-full flex overflow-hidden transition-colors duration-300">
 
-<!-- ================= NAVBAR ================= -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'home' %}">Findly</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'signup' %}">Sign Up</a>
-                    </li>
-                {% endif %}
-            </ul>
+    {% if user.is_authenticated %}
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-[#f8f9fa] dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 z-20 h-full fixed md:relative transition-transform duration-300">
+        <!-- Sidebar Header -->
+        <div class="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+            <a href="{% url 'dashboard:home' %}" class="text-xl font-bold tracking-tight text-indigo-500 dark:text-indigo-400">Findly</a>
+            <button id="closeSidebarBtn" class="md:hidden text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
-    </div>
-</nav>
+        
+        <!-- Sidebar Navigation -->
+        <nav class="flex-1 overflow-y-auto pt-6 pb-4 px-4 space-y-1.5">
+            <a href="{% url 'dashboard:home' %}" class="flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium {% if request.resolver_match.url_name == 'home' %}bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700{% endif %} transition-all duration-300">
+                <i class="bi bi-grid-1x2 text-xl mr-4 {% if request.resolver_match.url_name == 'home' %}text-indigo-500{% else %}text-gray-400{% endif %} transition-colors"></i> Dashboard
+            </a>
+            <a href="{% url 'items:list' %}" class="flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium {% if request.resolver_match.url_name == 'list' %}bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700{% endif %} transition-all duration-300">
+                <i class="bi bi-search text-xl mr-4 {% if request.resolver_match.url_name == 'list' %}text-indigo-500{% else %}text-gray-400{% endif %} transition-colors"></i> Browse Items
+            </a>
+            <a href="{% url 'items:mine' %}" class="flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium {% if request.resolver_match.url_name == 'mine' %}bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700{% endif %} transition-all duration-300">
+                <i class="bi bi-collection text-xl mr-4 {% if request.resolver_match.url_name == 'mine' %}text-indigo-500{% else %}text-gray-400{% endif %} transition-colors"></i> My Items
+            </a>
+            <a href="{% url 'messaging:inbox' %}" class="flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium {% if request.resolver_match.url_name == 'inbox' %}bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700{% endif %} transition-all duration-300">
+                <i class="bi bi-chat-text text-xl mr-4 {% if request.resolver_match.url_name == 'inbox' %}text-indigo-500{% else %}text-gray-400{% endif %} transition-colors"></i> Messages
+            </a>
+            <a href="{% url 'notifications:list' %}" class="flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium {% if request.resolver_match.url_name == 'list' and request.resolver_match.namespace == 'notifications' %}bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700{% endif %} transition-all duration-300">
+                <i class="bi bi-bell text-xl mr-4 {% if request.resolver_match.url_name == 'list' and request.resolver_match.namespace == 'notifications' %}text-indigo-500{% else %}text-gray-400{% endif %} transition-colors"></i> Notifications
+            </a>
+        </nav>
+        
+        <!-- Sidebar Footer -->
+        <div class="p-4 flex-shrink-0">
+            <form method="post" action="{% url 'accounts:logout' %}" class="m-0 p-0">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center px-4 py-3 rounded-2xl text-[15px] font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-300">
+                    <i class="bi bi-box-arrow-right text-xl mr-4 transition-colors"></i> Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/50 z-10 hidden md:hidden"></div>
+    {% endif %}
 
-<!-- ================= MAIN LAYOUT ================= -->
-<div class="container-fluid">
-    <div class="row">
-        {% if user.is_authenticated %}
-            <!-- ================= SIDEBAR ================= -->
-            <div class="col-md-2 sidebar">
-                {% if request.user.role == 'owner' %}
-                    <h5 class="text-center">Owner Panel</h5>
-                    <a href="{% url 'dashboard' %}">Dashboard</a>
-                    <a href="{% url 'create_place' %}">Manage Listings</a>
-                    <a href="#">Reports</a>
-                    <a href="{% url 'logout' %}" class="text-danger">Logout</a>
-                {% elif request.user.role == 'user' %}
-                    <h5 class="text-center">User Panel</h5>
-                    <a href="{% url 'dashboard' %}">Dashboard</a>
-                    <a href="#">My Bookings</a>
-                    <a href="#">Profile</a>
-                    <a href="{% url 'logout' %}" class="text-danger">Logout</a>
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden w-full relative">
+        
+        <!-- Topbar -->
+        <header class="h-20 flex items-center justify-between px-6 sm:px-10 bg-[#fcfcfc] dark:bg-gray-800 z-10 flex-shrink-0 transition-colors duration-300">
+            <div class="flex items-center flex-1">
+                {% if user.is_authenticated %}
+                <button id="openSidebarBtn" class="md:hidden mr-6 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none rounded-full transition-colors">
+                    <i class="bi bi-list text-2xl"></i>
+                </button>
+                {% else %}
+                <a href="{% url 'dashboard:home' %}" class="text-xl font-bold tracking-tight text-indigo-500 dark:text-indigo-400 mr-10">Findly</a>
+                {% endif %}
+                
+                <!-- Search Bar -->
+                <div class="hidden sm:flex max-w-lg w-full relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="bi bi-search text-gray-400 group-hover:text-indigo-400 transition-colors duration-300"></i>
+                    </div>
+                    <form action="{% url 'items:list' %}" method="get" class="w-full m-0 p-0">
+                        <input type="text" name="q" placeholder="Search for items, users, or posts..." class="block w-full pl-12 pr-4 py-3 border border-transparent rounded-full leading-5 bg-[#f5f5f5] hover:bg-[#efefef] focus:bg-white dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 sm:text-[15px] transition-all duration-300">
+                    </form>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 sm:space-x-6">
+                <!-- Theme Toggle -->
+                <button id="themeToggleBtn" class="p-2.5 text-gray-400 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-full focus:outline-none transition-all duration-300">
+                    <i class="bi bi-moon-stars hidden dark:block text-lg"></i>
+                    <i class="bi bi-sun block dark:hidden text-lg"></i>
+                </button>
+
+                {% if user.is_authenticated %}
+                <!-- Profile Dropdown -->
+                <div class="relative">
+                    <button id="profileDropdownBtn" class="flex items-center space-x-3 text-[15px] font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none rounded-full md:rounded-3xl md:pl-2 md:pr-4 md:py-1.5 md:hover:bg-gray-100 transition-all duration-300">
+                        {% if user.profile and user.profile.image %}
+                            <img src="{{ user.profile.image.url }}" class="w-9 h-9 rounded-full object-cover" alt="Profile">
+                        {% else %}
+                            <div class="w-9 h-9 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                                <i class="bi bi-person text-xl"></i>
+                            </div>
+                        {% endif %}
+                        <span class="hidden md:block">{{ user.first_name|default:user.email }}</span>
+                        <i class="bi bi-chevron-down hidden md:block text-[10px] text-gray-400"></i>
+                    </button>
+                    <!-- Dropdown Menu -->
+                    <div id="profileDropdownMenu" class="hidden origin-top-right absolute right-0 mt-3 w-56 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 z-50 transition-all duration-300">
+                        <div class="px-5 py-3 border-b border-gray-50 dark:border-gray-700">
+                            <p class="text-[13px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Signed in as</p>
+                            <p class="text-[15px] font-semibold text-gray-800 dark:text-white truncate">{{ user.email }}</p>
+                        </div>
+                        <div class="py-2">
+                            <a href="{% url 'accounts:profile' %}" class="flex items-center px-5 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 hover:bg-gray-50 hover:text-indigo-600 dark:hover:bg-gray-700 transition-colors">
+                                <i class="bi bi-person mr-3 text-lg"></i> My Profile
+                            </a>
+                            <a href="{% url 'accounts:settings' %}" class="flex items-center px-5 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 hover:bg-gray-50 hover:text-indigo-600 dark:hover:bg-gray-700 transition-colors">
+                                <i class="bi bi-gear mr-3 text-lg"></i> Account Settings
+                            </a>
+                        </div>
+                        {% if user.is_staff %}
+                        <div class="py-2 border-t border-gray-50 dark:border-gray-700">
+                            <a href="/admin/" class="flex items-center px-5 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 hover:bg-gray-50 hover:text-indigo-600 dark:hover:bg-gray-700 transition-colors">
+                                <i class="bi bi-shield-lock mr-3 text-lg"></i> Admin Panel
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Log in</a>
+                    <a href="{% url 'accounts:register' %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">Sign up</a>
+                </div>
                 {% endif %}
             </div>
-            <!-- ================= CONTENT WRAPPER ================= -->
-            <div class="col-md-10 p-4">
-        {% else %}
-            <!-- ================= FULL WIDTH CONTENT IF NOT LOGGED IN ================= -->
-            <div class="col-12 p-4">
-        {% endif %}
+        </header>
 
-            {% block content %}{% endblock %}
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-6 sm:p-10 lg:p-12 relative z-0">
+            <div class="max-w-7xl mx-auto space-y-10">
+                <!-- Messages/Alerts -->
+                {% if messages %}
+                <div class="mb-8 space-y-3">
+                    {% for message in messages %}
+                    <div class="p-5 rounded-2xl border {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-700 border-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800{% else %}bg-[#f5f7fa] text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700{% endif %} shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                        <div class="flex items-start">
+                            <i class="bi {% if message.tags == 'error' %}bi-exclamation-circle{% elif message.tags == 'success' %}bi-check-circle{% else %}bi-info-circle{% endif %} mt-0.5 mr-4 text-[1.1rem]"></i>
+                            <p class="text-[15px] font-medium leading-relaxed">{{ message }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-        </div>  <!-- closing wrapper div -->
+                <!-- Main Content Block -->
+                {% block content %}{% endblock %}
+
+            </div>
+
+            <footer class="mt-auto py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                <p>&copy; {{ current_year }} Findly. All rights reserved.</p>
+            </footer>
+        </main>
     </div>
-</div>
 
-<footer>
-    &copy; {{ current_year }} Findly. All rights reserved.
-</footer>
+    <!-- UI Scripts -->
+    <script>
+        // Dark Mode Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        // Profile Dropdown Logic
+        const profileBtn = document.getElementById('profileDropdownBtn');
+        const profileMenu = document.getElementById('profileDropdownMenu');
+        if (profileBtn && profileMenu) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileMenu.classList.toggle('hidden');
+            });
+            document.addEventListener('click', (e) => {
+                if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target) && !profileMenu.classList.contains('hidden')) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
+        }
 
+        // Sidebar Mobile Toggle
+        const openSidebarBtn = document.getElementById('openSidebarBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openSidebar() {
+            if (sidebar && sidebarOverlay) {
+                sidebar.classList.remove('hidden');
+                sidebarOverlay.classList.remove('hidden');
+            }
+        }
+
+        function closeSidebar() {
+            if (sidebar && sidebarOverlay) {
+                sidebar.classList.add('hidden');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        if (openSidebarBtn) openSidebarBtn.addEventListener('click', openSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Map View - Findly{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}" />
+<style>
+    #map { width: 100%; height: 600px; }
+    .map-filter {
+        max-width: 420px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start gap-2">
+    <div>
+        <h2>Items Map</h2>
+        <p class="text-muted">View items with location data and explore them live.</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center map-filter">
+        <select id="statusFilter" class="form-select form-select-sm" style="min-width: 160px;">
+            <option value="">All status</option>
+            {% for key, label in status_choices %}
+                <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="categoryFilter" class="form-select form-select-sm" style="min-width: 160px;">
+            <option value="">All categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if filter_category|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <input id="qFilter" class="form-control form-control-sm" style="min-width: 160px;" placeholder="Search title" value="{{ query }}">
+
+        <button id="applyFilters" class="btn btn-sm btn-primary">Apply</button>
+        <button id="clearFilters" class="btn btn-sm btn-outline-secondary">Clear</button>
+        <button id="refreshBtn" class="btn btn-sm btn-outline-success">Refresh</button>
+        <button id="locateBtn" class="btn btn-sm btn-outline-primary">Track my location</button>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div id="map"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mapContainer = document.getElementById('map');
+        const errorNotice = () => {
+            mapContainer.innerHTML = '<div class="p-4 text-center text-muted">Unable to load map. Please open the browser console for errors.</div>';
+        };
+
+        if (typeof L === 'undefined') {
+            errorNotice();
+            return;
+        }
+
+        const dataUrl = "{% url 'items:map_data' %}";
+        const focusItem = "{{ focus_item }}";
+
+        const map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ensure the map renders immediately, even before any markers are loaded.
+        map.setView([0, 0], 2);
+        map.invalidateSize();
+
+        const markers = L.layerGroup().addTo(map);
+
+        let autoRefreshTimer = null;
+        let watchId = null;
+
+        function buildQuery() {
+            const params = new URLSearchParams();
+            const status = document.getElementById('statusFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const q = document.getElementById('qFilter').value;
+
+            if (status) params.set('status', status);
+            if (category) params.set('category', category);
+            if (q) params.set('q', q);
+            if (focusItem) params.set('focus', focusItem);
+
+            return params.toString();
+        }
+
+        async function loadItems() {
+            try {
+                const url = `${dataUrl}?${buildQuery()}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Could not load map data');
+                const payload = await res.json();
+                return payload.items || [];
+            } catch (err) {
+                console.warn(err);
+                return [];
+            }
+        }
+
+        function renderMarkers(items) {
+            markers.clearLayers();
+
+            if (!items.length) {
+                map.setView([0, 0], 2);
+                return;
+            }
+
+            items.forEach((item) => {
+                const marker = L.marker([item.lat, item.lng]);
+                marker.bindPopup(`<strong>${item.title}</strong><br/><small>${item.status}</small><br/><a href="${item.url}">View details</a>`);
+                markers.addLayer(marker);
+            });
+
+            const group = L.featureGroup(items.map(i => L.marker([i.lat, i.lng])));
+            if (focusItem) {
+                const focus = items.find(i => String(i.id) === String(focusItem));
+                if (focus) {
+                    map.setView([focus.lat, focus.lng], 15);
+                    return;
+                }
+            }
+            map.fitBounds(group.getBounds().pad(0.2));
+        }
+
+        async function refresh() {
+            const items = await loadItems();
+            renderMarkers(items);
+        }
+
+        function startAutoRefresh() {
+            stopAutoRefresh();
+            autoRefreshTimer = setInterval(refresh, 15000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
+            }
+        }
+
+        function startWatchingLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser.');
+                return;
+            }
+
+            document.getElementById('locateBtn').textContent = 'Stop tracking';
+
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    if (!window.userLocationMarker) {
+                        window.userLocationMarker = L.circleMarker([lat, lng], {
+                            radius: 7,
+                            color: '#007bff',
+                            fillColor: '#007bff',
+                            fillOpacity: 0.8,
+                        }).addTo(map).bindPopup('You are here');
+                    } else {
+                        window.userLocationMarker.setLatLng([lat, lng]);
+                    }
+
+                    map.setView([lat, lng], 13);
+                },
+                (err) => {
+                    console.warn('Geolocation error:', err);
+                },
+                { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+            );
+        }
+
+        function stopWatchingLocation() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            document.getElementById('locateBtn').textContent = 'Track my location';
+        }
+
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            refresh();
+        });
+
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('qFilter').value = '';
+            refresh();
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            refresh();
+        });
+
+        document.getElementById('locateBtn').addEventListener('click', () => {
+            if (watchId === null) {
+                startWatchingLocation();
+            } else {
+                stopWatchingLocation();
+            }
+        });
+
+        // initial render
+        refresh();
+
+        // auto-refresh the marker list every 15s
+        startAutoRefresh();
+    });
+</script>
+{% endblock %}

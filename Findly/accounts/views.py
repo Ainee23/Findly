@@ -1,0 +1,227 @@
+from django.contrib import messages
+from django.contrib.auth import login, get_user_model, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordChangeView,
+    PasswordChangeDoneView,
+)
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+
+from .forms import LoginForm, ProfileForm, RegisterForm
+
+User = get_user_model()
+
+import random
+from django.core.mail import send_mail
+from .models import EmailOTP
+from .models import Profile
+
+
+# ---------------- REGISTER ----------------
+
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+
+            login(request, user)
+
+            messages.success(request, "Welcome! Your account is ready.")
+
+            return redirect("dashboard:home")
+
+    else:
+        form = RegisterForm()
+
+    return render(
+        request,
+        "accounts/register.html",
+        {"form": form},
+    )
+
+
+# ---------------- SEND OTP ----------------
+
+def send_otp(user):
+
+    otp = str(random.randint(100000, 999999))
+    
+    # ✅ Add a highly visible print statement for local development
+    print(f"\n=========================================")
+    print(f"🔑 OTP FOR {user.email}: {otp}")
+    print(f"=========================================\n")
+
+    EmailOTP.objects.create(
+        user=user,
+        otp=otp,
+    )
+
+    send_mail(
+        "Findly Login OTP",
+        f"Your OTP is {otp}",
+        "findly@gmail.com",
+        [user.email],
+        fail_silently=False,
+    )
+
+
+# ---------------- LOGIN WITH OTP ----------------
+
+class UserLoginView(LoginView):
+
+    template_name = "accounts/login.html"
+    authentication_form = LoginForm
+    redirect_authenticated_user = True
+
+    def form_valid(self, form):
+
+        user = form.get_user()
+
+        # send otp
+        send_otp(user)
+
+        # save user in session
+        self.request.session["otp_user"] = user.id
+
+        return redirect("accounts:verify_otp")
+
+
+# ---------------- VERIFY OTP ----------------
+
+def verify_otp(request):
+
+    if request.method == "POST":
+
+        otp = request.POST.get("otp")
+
+        user_id = request.session.get("otp_user")
+
+        obj = EmailOTP.objects.filter(
+            user_id=user_id,
+            otp=otp,
+        ).last()
+
+        if obj:
+
+            user = obj.user
+
+            login(request, user)
+
+            messages.success(request, "Login successful")
+
+            # redirect based on role
+            if hasattr(user, "role") and user.role == "owner":
+                return redirect("dashboard:admin_overview")
+
+            return redirect("dashboard:home")
+
+        else:
+            messages.error(request, "Invalid OTP")
+
+    return render(
+        request,
+        "accounts/verify.html",
+    )
+
+
+# ---------------- LOGOUT ----------------
+
+class UserLogoutView(LogoutView):
+
+    next_page = reverse_lazy("accounts:login")
+
+
+# ---------------- PROFILE ----------------
+
+@login_required
+def profile(request):
+
+    if request.method == "POST":
+
+        form = ProfileForm(
+            request.POST,
+            instance=request.user,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Profile updated successfully.",
+            )
+
+            return redirect("accounts:profile")
+
+    else:
+        form = ProfileForm(
+            instance=request.user
+        )
+
+    return render(
+        request,
+        "accounts/profile.html",
+        {
+            "user": request.user,
+            "form": form,
+        },
+    )
+
+
+# ---------------- PASSWORD CHANGE ----------------
+
+class UserPasswordChangeView(PasswordChangeView):
+
+    template_name = "accounts/password_change_form.html"
+
+    success_url = reverse_lazy(
+        "accounts:password_change_done"
+    )
+
+
+class UserPasswordChangeDoneView(
+    PasswordChangeDoneView
+):
+
+    template_name = (
+        "accounts/password_change_done.html"
+    )
+    
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def settings_view(request):
+
+    user = request.user
+
+    # ✅ create profile if missing
+    profile_obj, created = Profile.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+
+        user.first_name = request.POST.get("first_name", user.first_name)
+        user.last_name = request.POST.get("last_name", user.last_name)
+        user.email = request.POST.get("email", user.email)
+
+        user.save()
+
+        if request.FILES.get("image"):
+            profile_obj.image = request.FILES.get("image")
+            profile_obj.save()
+
+        return redirect("accounts:settings")
+
+    return render(
+        request,
+        "accounts/settings.html",
+        {
+            "user": user,
+            "profile": profile_obj,
+        },
+    )

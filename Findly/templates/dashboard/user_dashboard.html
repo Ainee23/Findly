@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+<h3 class="mb-4">
+Welcome, {{ user.first_name|default:user.email }}
+</h3>
+
+
+<div class="row">
+
+<div class="col-md-4">
+
+<div class="card p-3">
+
+<h5>Total Items</h5>
+
+<h2>{{ total_items }}</h2>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card p-3">
+
+<h5>My Items</h5>
+
+<h2>{{ my_items }}</h2>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card p-3">
+
+<h5>Total Users</h5>
+
+<h2>{{ total_users }}</h2>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<hr class="my-4">
+
+
+<div class="card p-4">
+
+<h4>Quick Actions</h4>
+
+<a href="{% url 'items:create' %}"
+class="btn btn-primary">
+Post Item
+</a>
+
+<a href="{% url 'items:mine' %}"
+class="btn btn-secondary">
+My Items
+</a>
+
+<a href="{% url 'accounts:settings' %}"
+class="btn btn-dark">
+Settings
+</a>
+
+</div>
+
+
+</div>
+
+{% endblock %}

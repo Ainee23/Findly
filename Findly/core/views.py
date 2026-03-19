@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
+from items.models import Item
+
 
 from .forms import FindlyPlaceForm   # ✅ added
 from .forms import UserForm          # ✅ added
@@ -52,9 +54,9 @@ def usersignupView(request):
         login(request, user)
 
         if user.role == "owner":
-            return redirect("admin_dashboard")
+            return redirect("dashboard:admin_overview")
 
-        return redirect("user_dashboard")
+        return redirect("dashboard:home")
 
     return render(request, "core/signup.html")
 
@@ -80,9 +82,9 @@ def userloginView(request):
             login(request, user)
 
             if user.role == "owner":
-                return redirect("admin_dashboard")
+                return redirect("dashboard:admin_overview")
 
-            return redirect("user_dashboard")
+            return redirect("dashboard:home")
 
         return render(
             request,
@@ -99,48 +101,6 @@ def userloginView(request):
 def userlogoutView(request):
     logout(request)
     return redirect("login")
-
-
-# ==============================
-# USER DASHBOARD
-# ==============================
-@login_required
-def user_dashboard(request):
-
-    if request.user.role != "user":
-        raise PermissionDenied
-
-    return render(
-        request,
-        "core/user_dashboard.html"
-    )
-
-
-# ==============================
-# OWNER DASHBOARD
-# ==============================
-@login_required
-def owner_dashboard(request):
-
-    if request.user.role != "owner":
-        raise PermissionDenied
-
-    return render(
-        request,
-        "core/admin_dashboard.html"
-    )
-
-
-# ==============================
-# AUTO DASHBOARD REDIRECT
-# ==============================
-@login_required
-def dashboardView(request):
-
-    if request.user.role == "owner":
-        return redirect("admin_dashboard")
-
-    return redirect("user_dashboard")
 
 
 # ==============================
@@ -193,9 +153,9 @@ def createPlace(request):
             place = form.save(commit=False)
             place.owner = request.user   # link place to owner
             place.save()
-            return redirect("dashboard")
+            return redirect("dashboard:home")
     else:
         form = FindlyPlaceForm()
         
     print("Rendering createPlace view for user:", request.user.email)
-    return render(request, "core/create_place.html", {"form": form})
+    return render(request, "core/create_place.html", {"form": form})

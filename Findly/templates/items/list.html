@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Items - Findly{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="mb-0">Found & Lost Items</h2>
+    </div>
+    <div class="col-md-6 d-flex justify-content-end gap-2">
+        <a href="{% url 'items:map' %}" class="btn btn-outline-primary btn-sm">View on Map</a>
+        <form method="GET" class="d-flex flex-grow-1">
+            <input type="text" name="q" class="form-control me-2" placeholder="Search items..." value="{{ request.GET.q }}">
+            <select name="status" class="form-select me-2" style="max-width: 150px;">
+                <option value="">All Status</option>
+                <option value="lost" {% if request.GET.status == 'lost' %}selected{% endif %}>Lost</option>
+                <option value="found" {% if request.GET.status == 'found' %}selected{% endif %}>Found</option>
+            </select>
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for item in items %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                <i class="bi bi-image" style="font-size: 3rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title text-truncate mb-0" title="{{ item.title }}">{{ item.title }}</h5>
+                    <span class="badge {% if item.status == 'lost' %}bg-danger{% elif item.status == 'found' %}bg-success{% else %}bg-secondary{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+                <p class="card-text text-muted small mb-3">
+                    <i class="bi bi-geo-alt"></i> {{ item.city|default:"Location unknown" }}<br>
+                    <i class="bi bi-calendar3"></i> {{ item.date_happened|default:"Date unknown" }}
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'items:detail' item.pk %}" class="btn btn-primary btn-sm">View Details</a>
+                    <a href="{% url 'items:map' %}?focus={{ item.pk }}" class="btn btn-outline-secondary btn-sm">View on Map</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <h4 class="text-muted">No items found matching your criteria.</h4>
+        <a href="{% url 'items:list' %}" class="btn btn-outline-secondary mt-3">Clear Filters</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Items Dashboard - Findly{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-box"></i> Items Dashboard
+    </h2>
+
+    <p class="text-muted">
+        Overview of lost & found items
+    </p>
+
+
+    <div class="row g-4">
+
+        <!-- TOTAL -->
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 shadow border-0">
+
+                <i class="bi bi-list-ul fs-1 text-primary"></i>
+
+                <h2>{{ total }}</h2>
+
+                <p>Total Items</p>
+
+            </div>
+        </div>
+
+
+        <!-- LOST -->
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 shadow border-0">
+
+                <i class="bi bi-search fs-1 text-danger"></i>
+
+                <h2>{{ lost }}</h2>
+
+                <p>Lost Items</p>
+
+            </div>
+        </div>
+
+
+        <!-- FOUND -->
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 shadow border-0">
+
+                <i class="bi bi-box-seam fs-1 text-success"></i>
+
+                <h2>{{ found }}</h2>
+
+                <p>Found Items</p>
+
+            </div>
+        </div>
+
+
+        <!-- MINE -->
+
+        <div class="col-md-3">
+            <div class="card stat-card text-center p-3 shadow border-0">
+
+                <i class="bi bi-person fs-1 text-info"></i>
+
+                <h2>{{ mine }}</h2>
+
+                <p>My Items</p>
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="mt-5 text-center">
+
+        <a href="{% url 'items:list' %}"
+           class="btn btn-outline-primary btn-lg mx-2">
+
+            <i class="bi bi-search"></i>
+            Browse Items
+
+        </a>
+
+
+        <a href="{% url 'items:create' %}"
+           class="btn btn-primary btn-lg mx-2">
+
+            <i class="bi bi-plus-circle"></i>
+            Post Item
+
+        </a>
+
+    </div>
+
+
+</div>
+
+
+
+<style>
+
+.stat-card {
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+</style>
+
+
+{% endblock %}

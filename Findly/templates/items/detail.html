@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} - Findly{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'items:list' %}">Items</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ item.title }}</li>
+    </ol>
+</nav>
+<form style="display:none;">{% csrf_token %}</form>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}" style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+            {% endif %}
+            <div class="card-body py-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="card-title mb-0">{{ item.title }}</h2>
+                    <span class="badge {% if item.status == 'lost' %}bg-danger{% elif item.status == 'found' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+                
+                <p class="card-text fs-5">{{ item.description }}</p>
+
+                <hr>
+
+                <div class="row mt-4">
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted mb-1"><i class="bi bi-geo-alt"></i> Location</h6>
+                        <p class="mb-0 fw-medium">{{ item.location }} {% if item.city %}({{ item.city }}){% endif %}</p>
+                        {% if item.latitude and item.longitude %}
+                            <p class="mb-0 small text-muted">Coordinates: {{ item.latitude }}, {{ item.longitude }}</p>
+                            <p class="mb-0 small text-muted">Updated {{ item.location_updated_at|timesince }} ago</p>
+                        {% endif %}
+
+                        {% if user == item.owner %}
+                            <button id="updateLocationBtn" class="btn btn-sm btn-outline-primary mt-2">Update location to current</button>
+                            <span id="updateLocationStatus" class="small text-muted ms-2"></span>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted mb-1"><i class="bi bi-calendar3"></i> Date</h6>
+                        <p class="mb-0 fw-medium">{{ item.date_happened|default:"Unknown" }}</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted mb-1"><i class="bi bi-tag"></i> Category</h6>
+                        <p class="mb-0 fw-medium">{{ item.category|default:"None" }}</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted mb-1"><i class="bi bi-clock"></i> Posted</h6>
+                        <p class="mb-0 fw-medium">{{ item.created_at|date }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if verification %}
+            <div class="card shadow-sm mb-4 border-info">
+                <div class="card-header bg-info text-dark fw-bold">
+                    <i class="bi bi-shield-check"></i> Verification Status
+                </div>
+                <div class="card-body">
+                    <p><strong>AI Match Score:</strong> {{ verification.ai_match_score|default:"0" }}%</p>
+                    <p><strong>Finder Confirmed:</strong> {% if verification.finder_confirmed %}<span class="text-success">Yes</span>{% else %}<span class="text-warning">Pending</span>{% endif %}</p>
+                    
+                    {% if user == item.owner and not verification.finder_confirmed %}
+                        <a href="{% url 'items:confirm_owner' verification.pk %}" class="btn btn-success mt-2">I Confirm This Is Mine</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-3">Posted by</h5>
+                <img src="https://ui-avatars.com/api/?name={{ item.owner.first_name|default:item.owner.email }}&background=random" class="rounded-circle mb-2" width="80" alt="Avatar">
+                <h6 class="mb-1">{{ item.owner.first_name }} {{ item.owner.last_name }}</h6>
+                <p class="text-muted small mb-3">Joined {{ item.owner.date_joined|date:"M Y" }}</p>
+                
+                <a href="{% url 'reviews:user' item.owner.pk %}" class="btn btn-outline-secondary btn-sm mb-3">View User Reviews</a>
+
+                {% if user.is_authenticated and user != item.owner %}
+                <div class="d-grid gap-2">
+                    <a href="{% url 'messaging:start' item.pk %}" class="btn btn-primary"><i class="bi bi-chat-dots"></i> Message {{ item.owner.first_name|default:"Owner" }}</a>
+                    
+                    {% if item.status in 'lost found' %}
+                        <a href="{% url 'items:send_claim' item.pk %}" class="btn btn-outline-warning"><i class="bi bi-hand-index"></i>
+                            {% if item.status == 'lost' %}
+                                I found this
+                            {% else %}
+                                Claim item
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if user_claim %}
+                    <div class="alert alert-info mt-3 small">
+                                {% if user_claim.approved and not user_claim.pickup_confirmed %}
+                            <strong>Your claim was approved.</strong> Please coordinate with the owner to arrange pickup.
+
+                            <div class="mt-2">
+                                <button id="shareLocationBtn" class="btn btn-sm btn-outline-secondary">Share live location</button>
+                                <span id="shareLocationStatus" class="small text-muted ms-2"></span>
+                                <form id="confirmPickupForm" method="post" action="{% url 'items:confirm_pickup' user_claim.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success">Confirm pickup</button>
+                                </form>
+                            </div>
+
+                            <div class="mt-2">
+                                <small class="text-muted">Owner location: {{ item.latitude }}, {{ item.longitude }}</small><br>
+                                <small class="text-muted">Your last shared location: {{ user_claim.finder_lat }}, {{ user_claim.finder_lng }}</small>
+                            </div>
+
+                        {% elif user_claim.pickup_confirmed %}
+                            <strong>Pickup confirmed.</strong>
+                            <div class="mt-2">
+                                <a href="{% url 'reviews:leave' item.owner.pk %}" class="btn btn-sm btn-outline-primary">Leave a review for the owner</a>
+                            </div>
+                        {% elif user_claim.rejected %}
+                            <strong>Your claim was rejected.</strong> You can contact the owner by message.
+                        {% elif user_claim.proof_requested %}
+                            <strong>Owner requested more proof.</strong> <a href="{% url 'items:edit_claim' user_claim.pk %}">Update your claim</a>.
+                        {% else %}
+                            <strong>Your claim is pending.</strong> The owner will review and respond soon.
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% elif user == item.owner %}
+                <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small">
+                    <i class="bi bi-info-circle"></i> This is your post.
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'qr:item' item.pk %}" target="_blank" class="btn btn-outline-dark btn-sm"><i class="bi bi-qr-code"></i> Get QR Code</a>
+                </div>
+
+                {% if claims %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <strong>Claims ({{ claims.count }})</strong>
+                    </div>
+                    <div class="card-body">
+                        {% for claim in claims %}
+                            <div class="border rounded p-2 mb-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ claim.sender.get_full_name|default:claim.sender.email }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ claim.created_at|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                    <span class="badge {% if claim.approved %}bg-success{% elif claim.rejected %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {% if claim.approved %}Approved{% elif claim.rejected %}Rejected{% elif claim.proof_requested %}Proof requested{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+
+                                {% if claim.approved and claim.finder_lat and claim.finder_lng %}
+                                    <div class="mb-2">
+                                        <small class="text-muted">Finder last location: {{ claim.finder_lat }}, {{ claim.finder_lng }}{% if claim.finder_location_updated_at %} (updated {{ claim.finder_location_updated_at|timesince }} ago){% endif %}</small>
+                                    </div>
+                                {% endif %}
+
+                                {% if claim.message %}
+                                    <p class="mb-1 mt-2">{{ claim.message|linebreaksbr }}</p>
+                                {% endif %}
+
+                                {% if claim.proof_image %}
+                                    <div class="mb-2">
+                                        <strong>Proof image:</strong><br>
+                                        <img src="{{ claim.proof_image.url }}" class="img-fluid" style="max-height:180px;" />
+                                    </div>
+                                {% endif %}
+
+                                {% if claim.proof_document %}
+                                    <div class="mb-2">
+                                        <strong>Proof file:</strong> <a href="{{ claim.proof_document.url }}" target="_blank">Download</a>
+                                    </div>
+                                {% endif %}
+
+                                {% if claim.owner_response %}
+                                    <div class="alert alert-warning py-2">
+                                        <strong>Owner note:</strong> {{ claim.owner_response|linebreaksbr }}
+                                    </div>
+                                {% endif %}
+
+                                {% if not claim.approved and not claim.rejected %}
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="{% url 'items:accept_claim' claim.pk %}" class="btn btn-sm btn-success">Approve</a>
+                                        <a href="{% url 'items:reject_claim' claim.pk %}" class="btn btn-sm btn-danger">Reject</a>
+
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#request-proof-{{ claim.pk }}">Request Proof</button>
+                                    </div>
+
+                                    <div class="collapse mt-2" id="request-proof-{{ claim.pk }}">
+                                        <form method="post" action="{% url 'items:request_claim_proof' claim.pk %}">
+                                            {% csrf_token %}
+                                            <div class="mb-2">
+                                                <textarea name="owner_response" class="form-control form-control-sm" rows="2" placeholder="Ask for a photo, receipt, or other proof">{{ claim.owner_response }}</textarea>
+                                            </div>
+                                            <button class="btn btn-sm btn-primary">Send request</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+
+                                {% if user_claim and user_claim.pk == claim.pk and not claim.approved and not claim.rejected %}
+                                    <div class="mt-2">
+                                        <a href="{% url 'items:edit_claim' claim.pk %}" class="btn btn-sm btn-outline-primary">Update Claim</a>
+                                    </div>
+                                {% endif %}
+
+                                {% if claim.pickup_confirmed %}
+                                    <div class="mt-2">
+                                        <a href="{% url 'reviews:leave' claim.sender.pk %}" class="btn btn-sm btn-outline-primary">Leave a review for the finder</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="d-grid mt-3">
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary">Login to Contact</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const btn = document.getElementById('updateLocationBtn');
+        const status = document.getElementById('updateLocationStatus');
+        if (!btn) return;
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        async function updateLocation(lat, lng) {
+            try {
+                status.textContent = 'Updating…';
+                const res = await fetch('{% url "items:update_location" item.pk %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ lat, lng }),
+                });
+
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch (err) {
+                    // ignore parse errors
+                }
+
+                if (!res.ok) {
+                    throw new Error(data.message || res.statusText || 'Update failed');
+                }
+
+                status.textContent = 'Location saved';
+                setTimeout(() => { status.textContent = ''; }, 3000);
+
+                const coordLine = document.querySelector('.card-body p.small.text-muted');
+                if (coordLine) {
+                    coordLine.textContent = `Coordinates: ${lat}, ${lng}`;
+                }
+            } catch (err) {
+                status.textContent = err.message;
+            }
+        }
+
+        let watchId = null;
+
+        function startLiveTracking() {
+            if (!navigator.geolocation) {
+                status.textContent = 'Geolocation not supported by your browser.';
+                return;
+            }
+
+            btn.textContent = 'Stop live tracking';
+            status.textContent = 'Tracking location…';
+
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    updateLocation(pos.coords.latitude, pos.coords.longitude);
+                },
+                (err) => {
+                    status.textContent = err.message || 'Unable to get location';
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            );
+        }
+
+        function stopLiveTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            btn.textContent = 'Update location to current';
+            status.textContent = '';
+        }
+
+        btn.addEventListener('click', () => {
+            if (watchId === null) {
+                startLiveTracking();
+            } else {
+                stopLiveTracking();
+            }
+        });
+    })();
+</script>
+
+{% if user_claim and user_claim.approved and not user_claim.pickup_confirmed %}
+<script>
+    (function() {
+        const shareBtn = document.getElementById('shareLocationBtn');
+        const shareStatus = document.getElementById('shareLocationStatus');
+        if (!shareBtn) return;
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        async function updateClaimLocation(lat, lng) {
+            try {
+                shareStatus.textContent = 'Sharing location…';
+                const res = await fetch('{% url "items:update_claim_location" user_claim.pk %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ lat, lng }),
+                });
+
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch (err) {
+                    // ignore parse errors
+                }
+
+                if (!res.ok) {
+                    throw new Error(data.message || res.statusText || 'Update failed');
+                }
+
+                shareStatus.textContent = 'Location shared';
+                setTimeout(() => { shareStatus.textContent = ''; }, 3000);
+            } catch (err) {
+                shareStatus.textContent = err.message;
+            }
+        }
+
+        let watchId = null;
+
+        function startSharing() {
+            if (!navigator.geolocation) {
+                shareStatus.textContent = 'Geolocation not supported by your browser.';
+                return;
+            }
+
+            shareBtn.textContent = 'Stop sharing';
+            shareStatus.textContent = 'Sharing live location…';
+
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    updateClaimLocation(pos.coords.latitude, pos.coords.longitude);
+                },
+                (err) => {
+                    shareStatus.textContent = err.message || 'Unable to get location';
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            );
+        }
+
+        function stopSharing() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            shareBtn.textContent = 'Share live location';
+            shareStatus.textContent = '';
+        }
+
+        shareBtn.addEventListener('click', () => {
+            if (watchId === null) {
+                startSharing();
+            } else {
+                stopSharing();
+            }
+        });
+    })();
+</script>
+{% endif %}
+
+{% endblock %}

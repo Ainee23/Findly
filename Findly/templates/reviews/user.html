@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile & Reviews - Findly{% endblock %}
+
+{% block content %}
+<div class="row mb-5 justify-content-center">
+    <!-- User summary card -->
+    <div class="col-md-4 text-center">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4">
+                <img src="https://ui-avatars.com/api/?name={{ profile_user.first_name|default:profile_user.email }}&background=random" class="rounded-circle mb-3 border shadow-sm" width="120" alt="Avatar">
+                <h3>{{ profile_user.first_name }} {{ profile_user.last_name }}</h3>
+                <p class="text-muted mb-2">Joined {{ profile_user.date_joined|date:"M Y" }}</p>
+                <div class="d-flex justify-content-center align-items-center mb-4">
+                    <h2 class="text-warning mb-0 me-2">{{ stats.avg|default:"N/A"|floatformat:1 }} <i class="bi bi-star-fill pb-1" style="font-size: 1.5rem;"></i></h2>
+                    <span class="text-muted">({{ stats.count }} reviews)</span>
+                </div>
+                
+                {% if user.is_authenticated and user != profile_user %}
+                    <a href="{% url 'reviews:leave' profile_user.pk %}" class="btn btn-primary w-100 mb-2"><i class="bi bi-pen"></i> Leave a Review</a>
+                {% elif user == profile_user %}
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-gear"></i> Edit Profile</a>
+                {% endif %}
+                <a href="{% url 'qr:user' profile_user.pk %}" class="btn btn-outline-dark w-100"><i class="bi bi-qr-code"></i> User QR Code</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review list -->
+    <div class="col-md-8 mt-4 mt-md-0">
+        <h4 class="mb-4">Reviews</h4>
+        
+        <div class="list-group shadow-sm">
+            {% for review in reviews %}
+                <div class="list-group-item p-4">
+                    <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ review.reviewer.first_name|default:review.reviewer.email }}</h6>
+                            <div class="text-warning small mt-1">
+                                {% for i in "12345"|make_list %}
+                                    <i class="bi bi-star{% if forloop.counter <= review.rating %}-fill{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ review.created_at|date }}</small>
+                    </div>
+                    <p class="mb-1 mt-2">{{ review.comment }}</p>
+                </div>
+            {% empty %}
+                <div class="list-group-item text-center py-5 text-muted">
+                    <i class="bi bi-star text-secondary mb-3" style="font-size: 3rem;"></i>
+                    <h5>No reviews yet</h5>
+                    <p>This user hasn't received any reviews.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

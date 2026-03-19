@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Leave Review - Findly{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'reviews:user' profile_user.pk %}">{{ profile_user.first_name }}'s Profile</a></li>
+        <li class="breadcrumb-item active">Leave Review</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h4 class="card-title fw-bold mb-0 text-center">Review {{ profile_user.first_name|default:profile_user.email }}</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+                <img src="https://ui-avatars.com/api/?name={{ profile_user.first_name|default:profile_user.email }}&background=random" class="rounded-circle mb-4 border" width="80" alt="Avatar">
+                
+                <form method="POST" novalidate class="text-start">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label fw-bold d-block">Rating (1-5)</label>
+                        {{ form.rating }}
+                        {% if form.rating.errors %}
+                            <div class="text-danger small mt-1">{{ form.rating.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-block">Comment (optional)</label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}
+                            <div class="text-danger small mt-1">{{ form.comment.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-send"></i> Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    form input[type="number"] {
+        width: 150px;
+        margin: auto;
+        display: block;
+        padding: .5rem;
+        font-size: 1.25rem;
+        text-align: center;
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+    }
+    form textarea {
+        display: block;
+        width: 100%;
+        padding: .5rem .75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        resize: none;
+    }
+    form input:focus, form textarea:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+</style>
+
+<script>
+    // Enhance number input to use Star icons for rating if possible
+    // Basic implementation keeps native number spinner
+</script>
+{% endblock %}

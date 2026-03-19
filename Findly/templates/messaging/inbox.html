@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Inbox - Findly{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex space-x-3 items-center">
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center">
+            <i class="bi bi-chat-text text-xl"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white tracking-tight">Messages</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Your recent conversations</p>
+        </div>
+    </div>
+
+    <!-- Chat List -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden">
+        {% for thread in threads %}
+            <a href="{% url 'messaging:thread' thread.pk %}" class="block group border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div class="p-4 sm:p-5 flex items-center space-x-4">
+                    <!-- Avatar -->
+                    <div class="relative flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 flex items-center justify-center font-bold text-lg shadow-inner">
+                            {% for p in thread.participants.all %}
+                                {% if p != request.user %}{{ p.first_name|default:p.email|make_list|first|upper }}{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="text-[16px] font-semibold text-gray-800 dark:text-gray-100 truncate pr-4">
+                                {% for p in thread.participants.all %}
+                                    {% if p != request.user %}{{ p.first_name|default:p.email }}{% endif %}
+                                {% endfor %}
+                            </h3>
+                            <span class="text-xs font-medium text-gray-400 dark:text-gray-500 whitespace-nowrap">{{ thread.last_msg_at|timesince }}</span>
+                        </div>
+                        <p class="text-[14px] text-gray-500 dark:text-gray-400 truncate">
+                            {% if thread.item %}
+                                <i class="bi bi-tag-fill text-indigo-400 mr-1 text-xs"></i> {{ thread.item.title }}
+                            {% else %}
+                                <i class="bi bi-chat-dots text-gray-400 mr-1 text-xs"></i> General Chat
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <div class="p-10 text-center">
+                <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-chat-square text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-1">No messages yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">When you message someone about an item, the conversation will appear here.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

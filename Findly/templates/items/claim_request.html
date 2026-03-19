@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Claim Item - {{ item.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'items:list' %}">Items</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'items:detail' item.pk %}">{{ item.title }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Claim</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="card-title">Claim "{{ item.title }}"</h3>
+        <p class="text-muted">Please provide some details and optional proof (photo, receipt, etc.) so the owner can verify.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Submit Claim</button>
+                <a href="{% url 'items:detail' item.pk %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

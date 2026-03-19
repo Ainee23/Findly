@@ -21,7 +21,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'user_dashboard' %}">Dashboard</a>
+                            <a class="nav-link" href="{% url 'dashboard:home' %}">Dashboard</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">My Profile</a>
@@ -29,15 +29,18 @@
                     {% endif %}
 
                     <li class="nav-item">
-                        <a class="nav-link text-warning" href="{% url 'logout' %}">Logout</a>
+                        <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link text-warning" style="background:none;border:none;cursor:pointer;">Logout</button>
+                        </form>
                     </li>
 
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-warning text-dark ms-2" href="{% url 'signup' %}">Sign Up</a>
+                        <a class="nav-link btn btn-warning text-dark ms-2" href="{% url 'accounts:register' %}">Sign Up</a>
                     </li>
                 {% endif %}
 

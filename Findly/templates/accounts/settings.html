@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Profile Settings</h3>
+
+<form method="POST" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700">First Name</label>
+        <input type="text" name="first_name" value="{{ user.first_name|default:'' }}"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Last Name</label>
+        <input type="text" name="last_name" value="{{ user.last_name|default:'' }}"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email"
+               value="{{ user.email }}"
+               class="form-control">
+    </div>
+
+        <label>First Name</label>
+        <input type="text" name="first_name"
+               value="{{ user.first_name }}"
+               class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>Last Name</label>
+        <input type="text" name="last_name"
+               value="{{ user.last_name }}"
+               class="form-control">
+    </div>
+
+    <!-- ✅ IMAGE -->
+    <div class="mb-3">
+        <label>Profile Image</label>
+        <input type="file" name="image" class="form-control">
+    </div>
+
+    {% if user.profile.image %}
+        <img src="{{ user.profile.image.url }}"
+             width="120"
+             class="mt-2">
+    {% endif %}
+
+    <br><br>
+
+    <button class="btn btn-primary">
+        Save Changes
+    </button>
+
+</form>
+
+</div>
+
+{% endblock %}
