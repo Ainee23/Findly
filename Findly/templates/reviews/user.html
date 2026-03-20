@@ -21,7 +21,24 @@
                 {% elif user == profile_user %}
                     <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-gear"></i> Edit Profile</a>
                 {% endif %}
-                <a href="{% url 'qr:user' profile_user.pk %}" class="btn btn-outline-dark w-100"><i class="bi bi-qr-code"></i> User QR Code</a>
+                <button type="button" class="btn btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#userQrModal"><i class="bi bi-qr-code"></i> User QR Code</button>
+
+<!-- User QR Modal -->
+<div class="modal fade" id="userQrModal" tabindex="-1" aria-label="User QR Code">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title w-100"><i class="bi bi-qr-code"></i> {{ profile_user.first_name }}'s QR Code</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <img src="{% url 'qr:user_image' profile_user.pk %}" alt="User QR Code" class="img-fluid border rounded p-2 shadow-sm" style="max-width:220px;">
+        <p class="text-muted small mt-3">Scanning this QR code will show all items reported by {{ profile_user.first_name|default:profile_user.email }}.</p>
+        <a href="{% url 'qr:user' profile_user.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" target="_blank">Open scan page</a>
+      </div>
+    </div>
+  </div>
+</div>
             </div>
         </div>
     </div>

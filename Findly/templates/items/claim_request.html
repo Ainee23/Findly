@@ -11,19 +11,47 @@
     </ol>
 </nav>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <h3 class="card-title">Claim "{{ item.title }}"</h3>
-        <p class="text-muted">Please provide some details and optional proof (photo, receipt, etc.) so the owner can verify.</p>
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+
+      <!-- Card Header -->
+      <div class="card-header border-0 py-4 px-4"
+           style="background: linear-gradient(135deg, #1a56db 0%, #6610f2 100%);">
+        <h4 class="text-white fw-bold mb-1">
+          <i class="bi bi-hand-index-thumb-fill me-2"></i>Claim Item
+        </h4>
+        <p class="text-white opacity-75 mb-0 small">
+          "{{ item.title }}"
+        </p>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body p-4">
+        <p class="text-muted mb-4" style="line-height:1.6;">
+          Provide details and optional proof (photo, receipt, etc.) so the owner can verify your claim.
+        </p>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Submit Claim</button>
-                <a href="{% url 'items:detail' item.pk %}" class="btn btn-outline-secondary">Cancel</a>
+
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit"
+                        class="btn btn-primary rounded-pill fw-semibold flex-grow-1"
+                        style="padding: 10px 0; font-size: 0.95rem; letter-spacing: 0.01em;">
+                    <i class="bi bi-check-lg me-2"></i>Submit Claim
+                </button>
+                <a href="{% url 'items:detail' item.pk %}"
+                   class="btn btn-secondary rounded-pill fw-semibold px-4 shadow-sm"
+                   style="padding: 10px 22px; font-size: 0.95rem; letter-spacing: 0.01em;">
+                    <i class="bi bi-x me-1"></i>Cancel
+                </a>
             </div>
         </form>
+      </div>
+
     </div>
+  </div>
 </div>
 {% endblock %}
