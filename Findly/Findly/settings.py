@@ -133,19 +133,15 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_REDIRECT_URL = 'dashboard:home'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-DEFAULT_FROM_EMAIL = "findly@gmail.com"
-
 # ================= EMAIL CONFIG =================
-# To send real emails, uncomment these and add a valid app password
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'yourgmail@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your_16_digit_app_password'
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# To send real emails, we use Gmail SMTP backend instead of console
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='aineemakwana23@gmail.com')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='xylh cgae evfu qeqp')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Media files
 MEDIA_URL = '/media/'
