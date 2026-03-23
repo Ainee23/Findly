@@ -4,16 +4,22 @@ Django settings for Findly project.
 
 from pathlib import Path
 import os
+import sys
 import environ
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# ================= PATH FIX FOR RENDER =================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+sys.path.insert(0, str(BASE_DIR))
+
+
+# ================= ENV =================
 env = environ.Env(
     DEBUG=(bool, False)
 )
-# Read .env file if it exists
+
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
