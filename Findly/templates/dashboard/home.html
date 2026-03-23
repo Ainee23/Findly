@@ -104,9 +104,49 @@
         </a>
     </div>
 
-    <!-- Recent Activity Placeholder (Right 2 Columns) -->
+    <!-- Recent Activity (Right 2 Columns) -->
     <div class="lg:col-span-2">
         <h3 class="text-lg font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">Recent Activity</h3>
+        
+        {% if data.recent_activity %}
+        <div class="bg-white dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+            <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for activity in data.recent_activity %}
+                <li class="p-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                    <div class="flex items-start md:items-center space-x-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
+                            <i class="bi bi-bell{% if not activity.is_read %}-fill{% endif %} text-lg"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            {% if activity.link %}
+                            <a href="{{ activity.link }}" class="text-[15px] font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate block transition-colors">
+                                {{ activity.verb }}
+                            </a>
+                            {% else %}
+                            <p class="text-[15px] font-medium text-gray-900 dark:text-white truncate">
+                                {{ activity.verb }}
+                            </p>
+                            {% endif %}
+                            <p class="text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ activity.created_at|timesince }} ago
+                            </p>
+                        </div>
+                        {% if not activity.is_read %}
+                        <div class="flex-shrink-0">
+                            <span class="inline-block w-2.5 h-2.5 bg-indigo-500 rounded-full"></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 text-center">
+                <a href="{% url 'notifications:list' %}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
+                    View all activity &rarr;
+                </a>
+            </div>
+        </div>
+        {% else %}
         <div class="bg-white dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl p-8 border border-gray-100 dark:border-gray-700 h-full min-h-[250px] flex flex-col items-center justify-center text-center transition-colors duration-300">
             
             <div class="w-20 h-20 rounded-3xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 flex items-center justify-center mb-5 transition-colors duration-300">
@@ -120,6 +160,7 @@
             </a>
 
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

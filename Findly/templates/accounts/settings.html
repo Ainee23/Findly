@@ -1,66 +1,138 @@
 {% extends "base.html" %}
 
+{% block title %}Profile Settings - Findly{% endblock %}
+
 {% block content %}
+<div class="max-w-6xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row gap-8">
+        
+        <!-- Settings Sidebar -->
+        <div class="w-full md:w-64 flex-shrink-0">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+                <nav class="space-y-1">
+                    <a href="{% url 'accounts:settings' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                        <i class="bi bi-person mr-3 text-lg"></i> Profile Settings
+                    </a>
+                    <a href="{% url 'accounts:profile' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <i class="bi bi-person-badge mr-3 text-lg"></i> Public Profile
+                    </a>
+                    <a href="{% url 'dashboard:home' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <i class="bi bi-grid mr-3 text-lg"></i> Dashboard
+                    </a>
+                </nav>
+            </div>
+        </div>
 
-<div class="container mt-4">
+        <!-- Settings Content -->
+        <div class="flex-1">
+            <div class="bg-[#f8f9fa] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <!-- Header -->
+                <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Profile Information</h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your account's profile information and email address.</p>
+                </div>
 
-<h3>Profile Settings</h3>
+                <!-- Form -->
+                <form method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+                    {% csrf_token %}
 
-<form method="POST" enctype="multipart/form-data">
+                    <!-- Group: Profile Info -->
+                    <div>
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <!-- Image Upload (Preview) -->
+                            <div class="flex-shrink-0 flex flex-col items-center sm:items-start">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Photo</label>
+                                <div class="flex items-center gap-4">
+                                    <div class="relative group">
+                                        {% if profile.image %}
+                                            <img id="imagePreview" src="{{ profile.image.url }}" class="h-24 w-24 rounded-full object-cover ring-4 ring-white dark:ring-gray-700 shadow-sm">
+                                        {% else %}
+                                            <div id="imagePreview" class="h-24 w-24 rounded-full bg-indigo-50 dark:bg-gray-700 flex items-center justify-center ring-4 ring-white dark:ring-gray-800 shadow-sm text-indigo-500 dark:text-indigo-400">
+                                                <i class="bi bi-person text-4xl"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <label for="imageUpload" class="cursor-pointer bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm px-4 py-2 inline-flex justify-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                            <span>Change Photo</span>
+                                            <input id="imageUpload" type="file" name="image" class="sr-only" accept="image/*" onchange="previewImage(event)">
+                                        </label>
+                                        <p class="mt-2 text-xs text-gray-400">JPG, GIF or PNG. 1MB max.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-    {% csrf_token %}
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div>
+                                <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+                                <input type="text" name="first_name" id="first_name" value="{{ user.first_name|default:'' }}" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 transition-colors">
+                            </div>
+                            <!-- Last Name -->
+                            <div>
+                                <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+                                <input type="text" name="last_name" id="last_name" value="{{ user.last_name|default:'' }}" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 transition-colors">
+                            </div>
+                        </div>
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700">First Name</label>
-        <input type="text" name="first_name" value="{{ user.first_name|default:'' }}"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <!-- Email -->
+                        <div class="mt-6">
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+                            <input type="email" name="email" id="email" value="{{ user.email }}" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 transition-colors">
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">We'll never share your email with anyone else.</p>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    <!-- Group: Account Actions -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Account Actions</h3>
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <!-- Save Button -->
+                            <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                <i class="bi bi-check2-circle mr-2 text-lg"></i> Save Changes
+                            </button>
+                            
+                            <!-- Logout Button -->
+                            <a href="{% url 'accounts:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                                <i class="bi bi-box-arrow-right mr-2"></i> Log out
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Last Name</label>
-        <input type="text" name="last_name" value="{{ user.last_name|default:'' }}"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-    </div>
-
-    <div class="mb-3">
-        <label>Email</label>
-        <input type="email" name="email"
-               value="{{ user.email }}"
-               class="form-control">
-    </div>
-
-        <label>First Name</label>
-        <input type="text" name="first_name"
-               value="{{ user.first_name }}"
-               class="form-control">
-    </div>
-
-    <div class="mb-3">
-        <label>Last Name</label>
-        <input type="text" name="last_name"
-               value="{{ user.last_name }}"
-               class="form-control">
-    </div>
-
-    <!-- ✅ IMAGE -->
-    <div class="mb-3">
-        <label>Profile Image</label>
-        <input type="file" name="image" class="form-control">
-    </div>
-
-    {% if user.profile.image %}
-        <img src="{{ user.profile.image.url }}"
-             width="120"
-             class="mt-2">
-    {% endif %}
-
-    <br><br>
-
-    <button class="btn btn-primary">
-        Save Changes
-    </button>
-
-</form>
-
 </div>
 
+<form id="logout-form" action="{% url 'accounts:logout' %}" method="POST" class="hidden">
+    {% csrf_token %}
+</form>
+
+<script>
+function previewImage(event) {
+    const input = event.target;
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            if (preview.tagName.toLowerCase() === 'img') {
+                preview.src = e.target.result;
+            } else {
+                // Replace div with img
+                const img = document.createElement('img');
+                img.id = 'imagePreview';
+                img.src = e.target.result;
+                img.className = 'h-24 w-24 rounded-full object-cover ring-4 ring-white dark:ring-gray-700 shadow-sm';
+                preview.parentNode.replaceChild(img, preview);
+            }
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 {% endblock %}

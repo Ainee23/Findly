@@ -22,13 +22,36 @@
 <div class="row">
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
-            {% if item.image %}
-            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}" style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+            {% if item.image or item.additional_images.exists %}
+            <div id="itemImageCarousel" class="carousel slide" data-bs-ride="carousel" style="background: #f8f9fa;">
+                <div class="carousel-inner">
+                    {% if item.image %}
+                    <div class="carousel-item active">
+                        <img src="{{ item.image.url }}" class="d-block w-100" alt="{{ item.title }}" style="max-height: 500px; object-fit: contain;">
+                    </div>
+                    {% endif %}
+                    {% for img in item.additional_images.all %}
+                    <div class="carousel-item {% if not item.image and forloop.first %}active{% endif %}">
+                        <img src="{{ img.image.url }}" class="d-block w-100" alt="{{ item.title }}" style="max-height: 500px; object-fit: contain;">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if item.image and item.additional_images.exists or item.additional_images.count > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#itemImageCarousel" data-bs-slide="prev" style="background: rgba(0,0,0,0.1); width: 10%;">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#itemImageCarousel" data-bs-slide="next" style="background: rgba(0,0,0,0.1); width: 10%;">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
             {% endif %}
             <div class="card-body py-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="card-title mb-0">{{ item.title }}</h2>
-                    <span class="badge {% if item.status == 'lost' %}bg-danger{% elif item.status == 'found' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+                    <span class="badge {% if item.status == 'lost' %}bg-danger{% elif item.status == 'found' %}bg-success{% elif item.status == 'claimed' %}bg-warning text-dark{% elif item.status == 'returned' %}bg-primary{% else %}bg-secondary{% endif %} fs-6">
                         {{ item.get_status_display }}
                     </span>
                 </div>
@@ -99,22 +122,22 @@
                 </a>
 
                 {% if user.is_authenticated and user != item.owner %}
-                <div class="d-grid gap-2">
-                    <a href="{% url 'messaging:start' item.pk %}" 
-                       class="btn btn-primary rounded-pill fw-semibold"
-                       style="padding: 9px 0; letter-spacing:0.01em;">
-                      <i class="bi bi-chat-dots-fill me-2"></i>Message {{ item.owner.first_name|default:"Owner" }}
-                    </a>
-                    
-                    {% if item.status in 'lost found' %}
-                        <a href="{% url 'items:send_claim' item.pk %}" 
-                           class="btn rounded-pill fw-semibold claim-btn-{% if item.status == 'lost' %}lost{% else %}found{% endif %}"
+                    <div class="d-grid gap-2 mb-3">
+                        <a href="{% url 'messaging:start' item.pk %}" 
+                           class="btn btn-primary rounded-pill fw-semibold"
                            style="padding: 9px 0; letter-spacing:0.01em;">
-                          <i class="bi bi-hand-index-thumb me-2"></i>
-                          {% if item.status == 'lost' %}I Found This{% else %}Claim Item{% endif %}
+                          <i class="bi bi-chat-dots-fill me-2"></i>Message {{ item.owner.first_name|default:"Owner" }}
                         </a>
-                    {% endif %}
-                </div>
+                        
+                        {% if item.status in 'lost found' %}
+                            <a href="{% url 'items:send_claim' item.pk %}" 
+                               class="btn rounded-pill fw-semibold claim-btn-{% if item.status == 'lost' %}lost{% else %}found{% endif %}"
+                               style="padding: 9px 0; letter-spacing:0.01em;">
+                              <i class="bi bi-hand-index-thumb me-2"></i>
+                              {% if item.status == 'lost' %}I Found This{% else %}Claim Item{% endif %}
+                            </a>
+                        {% endif %}
+                    </div>
 
                 {% if user_claim %}
                     <div class="alert alert-info mt-3 small">
@@ -151,6 +174,14 @@
                 {% endif %}
 
                 {% elif user == item.owner %}
+                <div class="d-grid gap-2 mb-3">
+                    <a href="{% url 'items:edit' item.pk %}" class="btn btn-outline-secondary rounded-pill fw-semibold" style="letter-spacing:0.01em;">
+                        <i class="bi bi-pencil me-1"></i> Edit Item
+                    </a>
+                    <a href="{% url 'items:delete' item.pk %}" class="btn btn-outline-danger rounded-pill fw-semibold" style="letter-spacing:0.01em;">
+                        <i class="bi bi-trash me-1"></i> Delete Item
+                    </a>
+                </div>
                 <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small">
                     <i class="bi bi-info-circle"></i> This is your post.
                 </div>

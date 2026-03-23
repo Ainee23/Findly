@@ -19,6 +19,8 @@ class Item(models.Model):
         PENDING = "pending", "Pending"
         LOST = "lost", "Lost"
         FOUND = "found", "Found"
+        CLAIMED = "claimed", "Claimed"
+        RETURNED = "returned", "Returned"
         CLOSED = "closed", "Closed"
 
 
@@ -130,6 +132,24 @@ class Item(models.Model):
 
         except Exception:
             pass
+
+
+class ItemImage(models.Model):
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        related_name="additional_images"
+    )
+    image = models.ImageField(upload_to="items/gallery/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image:
+            img = Image.open(self.image.path)
+            max_size = (800, 800)
+            img.thumbnail(max_size)
+            img.save(self.image.path)
 
 
 class ItemVerification(models.Model):

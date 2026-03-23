@@ -49,8 +49,10 @@
         // Apply dark mode early to avoid flash
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
         } else {
             document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-bs-theme', 'light');
         }
     </script>
 
@@ -216,9 +218,11 @@
             themeToggleBtn.addEventListener('click', function() {
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
                     localStorage.setItem('theme', 'light');
                 } else {
                     document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
                     localStorage.setItem('theme', 'dark');
                 }
             });

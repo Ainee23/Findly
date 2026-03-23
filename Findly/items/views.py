@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
@@ -12,6 +13,7 @@ from django.db.models import Count
 from .models import ClaimRequest, Item, Category, ItemVerification
 from .forms import ItemForm, ItemVerificationForm, ClaimRequestForm
 from notifications.models import Notification
+from dashboard.models import ActivityLog
 
 
 @login_required
@@ -55,22 +57,30 @@ def item_list(request):
     status = request.GET.get("status")
     city = request.GET.get("city")
     category = request.GET.get("category")
-
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+    user_q = request.GET.get("user")
 
     if q:
         items = items.filter(title__icontains=q)
 
-
     if status:
         items = items.filter(status=status)
-
 
     if city:
         items = items.filter(city__icontains=city)
 
-
     if category:
         items = items.filter(category_id=category)
+        
+    if date_from:
+        items = items.filter(date_happened__gte=date_from)
+        
+    if date_to:
+        items = items.filter(date_happened__lte=date_to)
+        
+    if user_q:
+        items = items.filter(Q(owner__email__icontains=user_q) | Q(owner__first_name__icontains=user_q))
 
 
     categories = Category.objects.all()
@@ -119,11 +129,64 @@ def item_create(request):
             item = form.save(commit=False)
             item.owner = request.user
             item.save()
+            
+            # Handle multiple images
+            images = request.FILES.getlist('uploaded_images')
+            for index, img_file in enumerate(images):
+                if index == 0 and not item.image:
+                    item.image = img_file
+                    item.save()
+                else:
+                    item.additional_images.create(image=img_file)
+                    
+            ActivityLog.objects.create(user=request.user, action='item_added', description=f"Posted item: {item.title}")
             messages.success(request, "Item posted.")
             return redirect("items:detail", pk=item.pk)
     else:
         form = ItemForm()
     return render(request, "items/create.html", {"form": form})
+
+
+@login_required
+def item_edit(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    if request.user != item.owner:
+        messages.error(request, "You do not have permission to edit this item.")
+        return redirect("items:detail", pk=pk)
+
+    if request.method == "POST":
+        form = ItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            
+            images = request.FILES.getlist('uploaded_images')
+            for index, img_file in enumerate(images):
+                if index == 0 and not item.image:
+                    item.image = img_file
+                    item.save()
+                else:
+                    item.additional_images.create(image=img_file)
+                    
+            messages.success(request, "Item updated.")
+            return redirect("items:detail", pk=item.pk)
+    else:
+        form = ItemForm(instance=item)
+    return render(request, "items/edit.html", {"form": form, "item": item})
+
+
+@login_required
+def item_delete(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    if request.user != item.owner:
+        messages.error(request, "You do not have permission to delete this item.")
+        return redirect("items:detail", pk=pk)
+
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, "Item deleted.")
+        return redirect("items:mine")
+    
+    return render(request, "items/delete.html", {"item": item})
 
 
 @login_required
@@ -270,6 +333,7 @@ def dashboard(request):
         }
     )
     
+@login_required
 def confirm_owner(request, pk):
 
     verification = get_object_or_404(
@@ -321,6 +385,16 @@ def send_claim(request, pk):
                 verb=f"New claim for '{item.title}'",
                 link=reverse('items:detail', args=[item.pk]),
             )
+            
+            send_mail(
+                subject=f"New Claim Request for {item.title}",
+                message=f"Hello,\n\n{request.user.email} has submitted a claim request for your item '{item.title}'.\n\nLog in to Findly to review it.",
+                from_email="findly@gmail.com",
+                recipient_list=[item.owner.email],
+                fail_silently=True,
+            )
+
+            ActivityLog.objects.create(user=request.user, action='item_claimed', description=f"Claimed item: {item.title}")
 
             messages.success(request, "Your claim request has been submitted.")
             return redirect("items:detail", pk=pk)
@@ -372,6 +446,14 @@ def accept_claim(request, pk):
         user=claim.sender,
         verb=f"Your claim for '{claim.item.title}' was approved",
         link=reverse('items:detail', args=[claim.item.pk]),
+    )
+
+    send_mail(
+        subject=f"Claim Approved: {claim.item.title}",
+        message=f"Hello,\n\nYour claim for '{claim.item.title}' was approved by the owner! Log in to Findly to coordinate pickup.",
+        from_email="findly@gmail.com",
+        recipient_list=[claim.sender.email],
+        fail_silently=True,
     )
 
     messages.success(request, "Claim approved. Please coordinate with the finder to share live locations and arrange pickup.")

@@ -2,14 +2,17 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 from items.models import Item
 from notifications.utils import notify
+from dashboard.models import ActivityLog
 
 from .forms import MessageForm
 from .models import Message, Thread
@@ -19,9 +22,11 @@ User = get_user_model()  # ✅ Use custom email-based User
 
 @login_required
 def inbox(request):
+    from django.db.models import Q, Count
     threads = (
         Thread.objects.filter(participants=request.user)
         .annotate(last_msg_at=Max("messages__created_at"))
+        .annotate(unread_count=Count('messages', filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user)))
         .order_by("-last_msg_at", "-updated_at")
     )
     return render(request, "messaging/inbox.html", {"threads": threads})
@@ -30,6 +35,10 @@ def inbox(request):
 @login_required
 def thread_detail(request, pk: int):
     thread = get_object_or_404(Thread, pk=pk, participants=request.user)
+    
+    # Mark messages as read
+    thread.messages.exclude(sender=request.user).update(is_read=True)
+    
     msgs = thread.messages.select_related("sender").order_by("created_at")
     if request.method == "POST":
         form = MessageForm(request.POST)
@@ -38,6 +47,7 @@ def thread_detail(request, pk: int):
             msg.thread = thread
             msg.sender = request.user
             msg.save()
+            ActivityLog.objects.create(user=request.user, action='message_sent', description=f"Sent a message inside a thread")
             thread.save(update_fields=["updated_at"])
             for u in thread.participants.exclude(pk=request.user.pk):
                 notify(
@@ -45,13 +55,32 @@ def thread_detail(request, pk: int):
                     f"New message from {request.user.email}",  # ✅ email not username
                     link=f"/messaging/thread/{thread.pk}/"
                 )
+                send_mail(
+                    subject="New message on Findly",
+                    message=f"You have a new message from {request.user.email} regarding an item. Log in to Findly to view and reply.",
+                    from_email="findly@gmail.com",
+                    recipient_list=[u.email],
+                    fail_silently=True,
+                )
             return redirect("messaging:thread", pk=thread.pk)
     else:
         form = MessageForm()
+        
+    other_participant = thread.participants.exclude(pk=request.user.pk).first()
+    is_online = False
+    if other_participant and other_participant.last_seen:
+        is_online = (timezone.now() - other_participant.last_seen).total_seconds() < 300
+
     return render(
         request,
         "messaging/thread.html",
-        {"thread": thread, "messages": msgs, "form": form}
+        {
+            "thread": thread, 
+            "messages": msgs, 
+            "form": form,
+            "other_participant": other_participant,
+            "is_online": is_online
+        }
     )
 
 
@@ -73,6 +102,7 @@ def start_thread(request, item_pk: int):
 
     thread = Thread.objects.create(item=item)
     thread.participants.add(request.user, item.owner)
+    ActivityLog.objects.create(user=request.user, action='message_sent', description=f"Started a thread for item: {item.title}")
     notify(
         item.owner,
         f"{request.user.email} started a chat about '{item.title}'",  # ✅ email not username

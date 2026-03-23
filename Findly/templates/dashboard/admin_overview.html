@@ -2,70 +2,139 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-
 <div class="container mt-4">
+    <h2 class="fw-bold text-danger mb-4"><i class="bi bi-shield-lock"></i> Admin Dashboard</h2>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-people fs-1 text-primary"></i>
+                <h3>{{ data.total_users }}</h3>
+                <p class="mb-0 text-muted small">Total Users</p>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-box fs-1 text-info"></i>
+                <h3>{{ data.total_items }}</h3>
+                <p class="mb-0 text-muted small">Total Items</p>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-check-circle fs-1 text-success"></i>
+                <h3>{{ data.claimed_items }}</h3>
+                <p class="mb-0 text-muted small">Claimed Items</p>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-search fs-1 text-warning"></i>
+                <h3>{{ data.lost_items }}</h3>
+                <p class="mb-0 text-muted small">Lost Items</p>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-chat fs-1 text-secondary"></i>
+                <h3>{{ data.total_messages }}</h3>
+                <p class="mb-0 text-muted small">Messages</p>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card shadow border-0 rounded-4 text-center p-3 h-100">
+                <i class="bi bi-star fs-1 text-danger"></i>
+                <h3>{{ data.total_reviews }}</h3>
+                <p class="mb-0 text-muted small">Reviews</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3">Items by Status</h5>
+                <div style="position: relative; height:250px; width:100%">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-4">Quick Links</h5>
+                <div class="d-flex flex-column gap-3">
+                    <a href="{% url 'items:dashboard' %}" class="btn btn-outline-primary text-start"><i class="bi bi-box-seam me-2"></i>My Items Dashboard</a>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-dark text-start"><i class="bi bi-person me-2"></i>My Profile</a>
+                    <a href="/admin/" class="btn btn-dark text-start"><i class="bi bi-gear me-2"></i>Django Backend Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h2 class="fw-bold text-danger mb-4">
-<i class="bi bi-shield-lock"></i> Admin Dashboard
-</h2>
+    <!-- Recent System Activity -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-12">
+            <div class="card shadow border-0 rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3">Recent System Activity</h5>
+                <div class="list-group list-group-flush">
+                    {% for activity in activities %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                        <div>
+                            <strong>{{ activity.user.first_name|default:activity.user.email }}</strong> 
+                            <span class="badge bg-secondary ms-2">{{ activity.get_action_display }}</span>
+                            <br>
+                            <small class="text-muted">{{ activity.description }}</small>
+                        </div>
+                        <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item px-0 text-muted">No recent activity.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="row g-4">
-
-<div class="col-md-3">
-<div class="card shadow border-0 rounded-4 text-center p-3">
-<i class="bi bi-box fs-1 text-primary"></i>
-<h3>{{ data.total_items }}</h3>
-<p>Total Items</p>
 </div>
-</div>
 
-<div class="col-md-3">
-<div class="card shadow border-0 rounded-4 text-center p-3">
-<i class="bi bi-chat fs-1 text-success"></i>
-<h3>{{ data.total_messages }}</h3>
-<p>Messages</p>
-</div>
-</div>
+{{ data.items_by_status|json_script:"status-data" }}
 
-<div class="col-md-3">
-<div class="card shadow border-0 rounded-4 text-center p-3">
-<i class="bi bi-bell fs-1 text-warning"></i>
-<h3>{{ data.total_notifications }}</h3>
-<p>Notifications</p>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="card shadow border-0 rounded-4 text-center p-3">
-<i class="bi bi-star fs-1 text-danger"></i>
-<h3>{{ data.total_reviews }}</h3>
-<p>Reviews</p>
-</div>
-</div>
-
-</div>
-
-
-<div class="mt-4">
-
-<a href="{% url 'items:dashboard' %}" class="btn btn-primary">
-Manage Items
-</a>
-
-<a href="{% url 'accounts:profile' %}" class="btn btn-outline-dark">
-Profile
-</a>
-
-<a href="{% url 'accounts:settings' %}" class="btn btn-outline-secondary">
-Settings
-</a>
-
-<a href="/admin/" class="btn btn-dark">
-Backend Admin
-</a>
-
-</div>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const rawData = JSON.parse(document.getElementById('status-data').textContent);
+        
+        const labels = rawData.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1));
+        const dataValues = rawData.map(item => item.c);
+        
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: [
+                        '#ffc107', 
+                        '#198754', 
+                        '#0dcaf0', 
+                        '#dc3545', 
+                        '#6c757d'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

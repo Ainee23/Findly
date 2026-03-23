@@ -91,6 +91,86 @@
 
             </div>
 
+            <!-- STATS ROW -->
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 text-center py-4 bg-primary text-white">
+                        <i class="bi bi-box-seam fs-1 mb-2"></i>
+                        <h3 class="fw-bold">{{ stats.total_items }}</h3>
+                        <span>Items Posted</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 text-center py-4 bg-warning text-dark">
+                        <i class="bi bi-hand-index-thumb fs-1 mb-2"></i>
+                        <h3 class="fw-bold">{{ stats.total_claims }}</h3>
+                        <span>Claims Made</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 text-center py-4 bg-success text-white">
+                        <i class="bi bi-star-fill fs-1 mb-2"></i>
+                        <h3 class="fw-bold">{{ stats.total_reviews }}</h3>
+                        <span>Reviews Left</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ACTIVITY ROW -->
+            <div class="row g-4 mt-2">
+                <!-- Recent Items -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+                        <h5 class="fw-bold border-bottom pb-2">Recent Items</h5>
+                        {% for item in items_posted %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-truncate">
+                                <i class="bi bi-circle-fill text-primary me-2" style="font-size: 0.5rem;"></i>
+                                <a href="{% url 'items:detail' item.pk %}" class="text-decoration-none text-dark">{{ item.title }}</a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small">No items posted yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Recent Claims -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+                        <h5 class="fw-bold border-bottom pb-2">Recent Claims</h5>
+                        {% for claim in my_claims %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-truncate">
+                                <i class="bi bi-circle-fill text-warning me-2" style="font-size: 0.5rem;"></i>
+                                <a href="{% url 'items:detail' claim.item.pk %}" class="text-decoration-none text-dark">{{ claim.item.title }}</a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small">No claims made yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Recent Reviews -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+                        <h5 class="fw-bold border-bottom pb-2">Recent Reviews</h5>
+                        {% for review in my_reviews %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-truncate">
+                                <i class="bi bi-circle-fill text-success me-2" style="font-size: 0.5rem;"></i>
+                                <a href="{% url 'reviews:user' review.reviewed_user.pk %}" class="text-decoration-none text-dark">{{ review.reviewed_user.first_name }}</a>
+                            </div>
+                            <span class="badge bg-light text-dark ms-2"><i class="bi bi-star-fill text-warning"></i> {{ review.rating }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small">No reviews written yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

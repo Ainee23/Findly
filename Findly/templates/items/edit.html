@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Item - Findly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h4 class="card-title fw-bold mb-0 text-center">Edit Item: {{ item.title }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-medium">{{ field.label }} {% if field.field.required %}<span class="text-danger">*</span>{% endif %}</label>
+                            {{ field }}
+                            {% if field.name == 'uploaded_images' %}
+                                <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mt-2 pb-2"></div>
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill flex-grow-1">
+                            <i class="bi bi-save me-1"></i> Save Changes
+                        </button>
+                        <a href="{% url 'items:detail' item.pk %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                            <i class="bi bi-x me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    form input[type="text"], 
+    form input[type="file"],
+    form input[type="date"],
+    form input[type="number"],
+    form select, 
+    form textarea {
+        display: block;
+        width: 100%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        appearance: none;
+        border-radius: .375rem;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    form input:focus, form select:focus, form textarea:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('id_uploaded_images');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                previewContainer.innerHTML = ''; 
+                const files = this.files;
+                if (files) {
+                    Array.from(files).forEach(file => {
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'img-thumbnail shadow-sm';
+                                img.style.width = '100px';
+                                img.style.height = '100px';
+                                img.style.objectFit = 'cover';
+                                img.style.borderRadius = '10px';
+                                previewContainer.appendChild(img);
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

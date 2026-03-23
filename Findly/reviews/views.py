@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ReviewForm
 from .models import Review
+from dashboard.models import ActivityLog
 
 User = get_user_model()  # ✅ Use custom email-based User
 
@@ -38,6 +39,7 @@ def leave_review(request, user_pk: int):
             review.reviewer = request.user
             review.reviewee = user
             review.save()
+            ActivityLog.objects.create(user=request.user, action='review_added', description=f"Left a review for {user.first_name}")
             messages.success(request, "Review saved.")
             return redirect("reviews:user", user_pk=user.pk)
     else:

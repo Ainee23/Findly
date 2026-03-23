@@ -3,7 +3,15 @@ from django import forms
 from .models import Item, ItemVerification, ClaimRequest
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
 class ItemForm(forms.ModelForm):
+    uploaded_images = forms.ImageField(
+        widget=MultipleFileInput(attrs={'multiple': True}),
+        required=False,
+        label="Item Images (Select multiple)"
+    )
 
     class Meta:
         model = Item
@@ -15,7 +23,6 @@ class ItemForm(forms.ModelForm):
             "city",
             "category",
             "date_happened",
-            "image",
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),

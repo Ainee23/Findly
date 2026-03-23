@@ -17,6 +17,9 @@
                         <div class="mb-3">
                             <label for="{{ field.id_for_label }}" class="form-label fw-medium">{{ field.label }} {% if field.field.required %}<span class="text-danger">*</span>{% endif %}</label>
                             {{ field }}
+                            {% if field.name == 'uploaded_images' %}
+                                <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mt-2 pb-2"></div>
+                            {% endif %}
                             {% if field.help_text %}
                                 <div class="form-text">{{ field.help_text }}</div>
                             {% endif %}
@@ -68,4 +71,36 @@
         box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('id_uploaded_images');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                previewContainer.innerHTML = ''; 
+                const files = this.files;
+                if (files) {
+                    Array.from(files).forEach(file => {
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'img-thumbnail shadow-sm';
+                                img.style.width = '100px';
+                                img.style.height = '100px';
+                                img.style.objectFit = 'cover';
+                                img.style.borderRadius = '10px';
+                                previewContainer.appendChild(img);
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

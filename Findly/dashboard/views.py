@@ -6,6 +6,7 @@ from items.models import Item
 from messaging.models import Message, Thread
 from notifications.models import Notification
 from reviews.models import Review
+from dashboard.models import ActivityLog
 from django.contrib.auth import get_user_model
 
 
@@ -19,6 +20,7 @@ def home(request):
         "my_items": Item.objects.filter(owner=request.user).count(),
         "my_threads": Thread.objects.filter(participants=request.user).count(),
         "unread_notifications": Notification.objects.filter(user=request.user, is_read=False).count(),
+        "recent_activity": Notification.objects.filter(user=request.user).order_by("-created_at")[:6],
     }
     return render(request, "dashboard/home.html", {"data": data})
 
@@ -26,11 +28,13 @@ def home(request):
 @user_passes_test(_is_staff)
 def admin_overview(request):
     data = {
+        "total_users": get_user_model().objects.count(),
         "total_items": Item.objects.count(),
-        "items_by_status": Item.objects.values("status").annotate(c=Count("id")).order_by("status"),
-        "total_threads": Thread.objects.count(),
+        "claimed_items": Item.objects.filter(status="claimed").count(),
+        "lost_items": Item.objects.filter(status="lost").count(),
         "total_messages": Message.objects.count(),
-        "total_notifications": Notification.objects.count(),
         "total_reviews": Review.objects.count(),
+        "items_by_status": list(Item.objects.values("status").annotate(c=Count("id")).order_by("status")),
     }
-    return render(request, "dashboard/admin_overview.html", {"data": data})
+    activities = ActivityLog.objects.select_related("user").order_by("-created_at")[:15]
+    return render(request, "dashboard/admin_overview.html", {"data": data, "activities": activities})

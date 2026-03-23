@@ -98,10 +98,14 @@
           <span class="status-badge
             {% if item.status == 'lost' %}text-danger bg-danger bg-opacity-10
             {% elif item.status == 'found' %}text-success bg-success bg-opacity-10
+            {% elif item.status == 'claimed' %}text-warning text-dark bg-warning bg-opacity-25
+            {% elif item.status == 'returned' %}text-primary bg-primary bg-opacity-10
             {% elif item.status == 'closed' %}text-secondary bg-secondary bg-opacity-10
-            {% else %}text-warning bg-warning bg-opacity-10{% endif %}">
+            {% else %}text-secondary bg-secondary bg-opacity-10{% endif %}">
             {% if item.status == 'lost' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>
             {% elif item.status == 'found' %}<i class="bi bi-check-circle-fill me-1"></i>
+            {% elif item.status == 'claimed' %}<i class="bi bi-handshake-fill me-1"></i>
+            {% elif item.status == 'returned' %}<i class="bi bi-box2-heart-fill me-1"></i>
             {% elif item.status == 'closed' %}<i class="bi bi-x-circle-fill me-1"></i>
             {% else %}<i class="bi bi-clock-fill me-1"></i>{% endif %}
             {{ item.get_status_display }}
@@ -128,6 +132,12 @@
                 title="Get QR Code">
           <i class="bi bi-qr-code"></i> <span class="d-none d-sm-inline">QR</span>
         </button>
+        <a href="{% url 'items:edit' item.pk %}" class="btn btn-sm btn-outline-secondary action-btn" title="Edit Item">
+          <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Edit</span>
+        </a>
+        <a href="{% url 'items:delete' item.pk %}" class="btn btn-sm btn-outline-danger action-btn" title="Delete Item">
+          <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Delete</span>
+        </a>
 
         <!-- Change Status Dropdown -->
         <div class="dropdown">
@@ -152,6 +162,18 @@
               <a class="dropdown-item {% if item.status == 'found' %}active{% endif %}"
                  href="{% url 'items:change_status' item.pk 'found' %}">
                 <span class="status-dot bg-success"></span> Found
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if item.status == 'claimed' %}active{% endif %}"
+                 href="{% url 'items:change_status' item.pk 'claimed' %}">
+                <span class="status-dot bg-warning"></span> Claimed
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if item.status == 'returned' %}active{% endif %}"
+                 href="{% url 'items:change_status' item.pk 'returned' %}">
+                <span class="status-dot bg-primary"></span> Returned
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>

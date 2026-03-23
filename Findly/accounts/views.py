@@ -18,6 +18,8 @@ import random
 from django.core.mail import send_mail
 from .models import EmailOTP
 from .models import Profile
+from items.models import Item, ClaimRequest
+from reviews.models import Review
 
 
 # ---------------- REGISTER ----------------
@@ -29,11 +31,15 @@ def register(request):
         if form.is_valid():
             user = form.save()
 
-            login(request, user)
+            # send otp for verification
+            send_otp(user)
 
-            messages.success(request, "Welcome! Your account is ready.")
+            # save user in session
+            request.session["otp_user"] = user.id
 
-            return redirect("dashboard:home")
+            messages.success(request, "Account created! Please verify your email.")
+
+            return redirect("accounts:verify_otp")
 
     else:
         form = RegisterForm()
@@ -140,12 +146,13 @@ class UserLogoutView(LogoutView):
 
 @login_required
 def profile(request):
+    user = request.user
 
     if request.method == "POST":
 
         form = ProfileForm(
             request.POST,
-            instance=request.user,
+            instance=user,
         )
 
         if form.is_valid():
@@ -160,15 +167,30 @@ def profile(request):
 
     else:
         form = ProfileForm(
-            instance=request.user
+            instance=user
         )
+        
+    # User stats gathering
+    items_posted = Item.objects.filter(owner=user).order_by("-created_at")
+    my_claims = ClaimRequest.objects.filter(sender=user).order_by("-created_at")
+    my_reviews = Review.objects.filter(reviewer=user).order_by("-created_at")
+    
+    stats = {
+        'total_items': items_posted.count(),
+        'total_claims': my_claims.count(),
+        'total_reviews': my_reviews.count(),
+    }
 
     return render(
         request,
         "accounts/profile.html",
         {
-            "user": request.user,
+            "user": user,
             "form": form,
+            "stats": stats,
+            "items_posted": items_posted[:5],
+            "my_claims": my_claims[:5],
+            "my_reviews": my_reviews[:5],
         },
     )
 
@@ -214,6 +236,8 @@ def settings_view(request):
         if request.FILES.get("image"):
             profile_obj.image = request.FILES.get("image")
             profile_obj.save()
+
+        messages.success(request, "✅ Profile updated!")
 
         return redirect("accounts:settings")
 

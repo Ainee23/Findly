@@ -115,36 +115,73 @@
 
 
 <!-- Search & Filter Bar -->
-<div class="search-bar">
-  <form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
-    <div class="flex-grow-1" style="min-width:200px;">
-      <div class="input-group">
-        <span class="input-group-text bg-white border-end-0 rounded-start-3">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" name="q" class="form-control border-start-0 ps-0"
-               placeholder="Search by title, location..."
-               value="{{ request.GET.q }}">
+<form method="GET" class="card shadow-sm border-0 rounded-4 mb-5 p-4 bg-white filter-form">
+  <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-sliders me-2"></i>Advanced Search Filters</h6>
+  <div class="row g-3">
+      <!-- Keyword -->
+      <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold mb-1">Keyword</label>
+          <input type="text" name="q" class="form-control" placeholder="Title or description..." value="{{ request.GET.q }}">
       </div>
-    </div>
+      
+      <!-- Status -->
+      <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold mb-1">Status</label>
+          <select name="status" class="form-select">
+              <option value="">All Status</option>
+              <option value="lost" {% if request.GET.status == 'lost' %}selected{% endif %}>🔴 Lost</option>
+              <option value="found" {% if request.GET.status == 'found' %}selected{% endif %}>🟢 Found</option>
+          </select>
+      </div>
 
-    <select name="status" class="form-select" style="max-width:160px;">
-      <option value="">All Status</option>
-      <option value="lost" {% if request.GET.status == 'lost' %}selected{% endif %}>🔴 Lost</option>
-      <option value="found" {% if request.GET.status == 'found' %}selected{% endif %}>🟢 Found</option>
-    </select>
+      <!-- Category -->
+      <div class="col-md-3">
+          <label class="form-label text-muted small fw-bold mb-1">Category</label>
+          <select name="category" class="form-select">
+              <option value="">All Categories</option>
+              {% for c in categories %}
+              <option value="{{ c.id }}" {% if request.GET.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+          </select>
+      </div>
 
-    <button class="btn btn-primary filter-btn" type="submit">
-      <i class="bi bi-funnel me-1"></i> Filter
-    </button>
+      <!-- Location -->
+      <div class="col-md-4">
+          <label class="form-label text-muted small fw-bold mb-1">City / Location</label>
+          <input type="text" name="city" class="form-control" placeholder="e.g. New York..." value="{{ request.GET.city }}">
+      </div>
+      
+      <!-- Date From -->
+      <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold mb-1">Date From</label>
+          <input type="date" name="date_from" class="form-control text-muted" value="{{ request.GET.date_from }}">
+      </div>
 
-    {% if request.GET.q or request.GET.status %}
-    <a href="{% url 'items:list' %}" class="btn btn-outline-secondary filter-btn">
-      <i class="bi bi-x me-1"></i> Clear
-    </a>
-    {% endif %}
-  </form>
-</div>
+      <!-- Date To -->
+      <div class="col-md-2">
+          <label class="form-label text-muted small fw-bold mb-1">Date To</label>
+          <input type="date" name="date_to" class="form-control text-muted" value="{{ request.GET.date_to }}">
+      </div>
+
+      <!-- User Search -->
+      <div class="col-md-4">
+          <label class="form-label text-muted small fw-bold mb-1">Posted By</label>
+          <input type="text" name="user" class="form-control" placeholder="User name or email..." value="{{ request.GET.user }}">
+      </div>
+
+      <!-- Buttons -->
+      <div class="col-md-4 d-flex align-items-end gap-2">
+          <button class="btn btn-primary flex-grow-1" type="submit" style="padding: 9px 0;">
+            <i class="bi bi-search me-1"></i> Apply Filters
+          </button>
+          {% if request.GET.q or request.GET.status or request.GET.category or request.GET.city or request.GET.date_from or request.GET.date_to or request.GET.user %}
+          <a href="{% url 'items:list' %}" class="btn btn-light border flex-grow-1 text-muted" style="padding: 9px 0;">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </a>
+          {% endif %}
+      </div>
+  </div>
+</form>
 
 <!-- Card Grid -->
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
@@ -167,8 +204,14 @@
           <span class="status-pill
             {% if item.status == 'lost' %}text-danger bg-danger bg-opacity-10
             {% elif item.status == 'found' %}text-success bg-success bg-opacity-10
+            {% elif item.status == 'claimed' %}text-warning text-dark bg-warning bg-opacity-25
+            {% elif item.status == 'returned' %}text-primary bg-primary bg-opacity-10
             {% else %}text-secondary bg-secondary bg-opacity-10{% endif %}">
-            {% if item.status == 'lost' %}🔴{% elif item.status == 'found' %}🟢{% else %}⚪{% endif %}
+            {% if item.status == 'lost' %}🔴
+            {% elif item.status == 'found' %}🟢
+            {% elif item.status == 'claimed' %}🤝
+            {% elif item.status == 'returned' %}✅
+            {% else %}⚪{% endif %}
             {{ item.get_status_display }}
           </span>
         </div>

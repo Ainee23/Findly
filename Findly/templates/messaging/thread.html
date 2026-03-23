@@ -26,7 +26,13 @@
                     {% endfor %}
                 </h3>
                 <p class="text-xs text-indigo-500 dark:text-indigo-400 font-medium mt-0.5">
-                    {% if thread.item %}Re: <a href="{% url 'items:detail' thread.item.pk %}" class="hover:underline">{{ thread.item.title }}</a>{% else %}Online{% endif %}
+                    {% if thread.item %}Re: <a href="{% url 'items:detail' thread.item.pk %}" class="hover:underline">{{ thread.item.title }}</a>{% endif %}
+                    {% if thread.item and other_participant %} &bull; {% endif %}
+                    {% if is_online %}
+                        <span class="text-green-500">Online</span>
+                    {% elif other_participant and other_participant.last_seen %}
+                        <span class="text-gray-500 dark:text-gray-400">Last seen {{ other_participant.last_seen|timesince }} ago</span>
+                    {% endif %}
                 </p>
             </div>
         </div>
@@ -45,7 +51,11 @@
                             <div class="text-right mt-1 ml-4 -mb-1 text-[11px] text-[#667781] dark:text-[#8696a0] flex items-center justify-end space-x-1 float-right">
                                 {% if msg.is_edited %}<span class="italic mr-1" id="msg-edited-{{ msg.pk }}">(edited)</span>{% endif %}
                                 <span>{{ msg.created_at|date:"g:i a" }}</span>
-                                <i class="bi bi-check2-all text-[#53bdeb] ml-0.5 text-sm"></i>
+                                {% if msg.is_read %}
+                                    <i class="bi bi-check2-all text-[#53bdeb] ml-0.5 text-[15px]"></i>
+                                {% else %}
+                                    <i class="bi bi-check2 ml-0.5 text-[15px]"></i>
+                                {% endif %}
                             </div>
                             <div class="clear-both"></div>
                         </div>
