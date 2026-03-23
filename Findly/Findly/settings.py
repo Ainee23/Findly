@@ -5,6 +5,7 @@ Django settings for Findly project.
 from pathlib import Path
 import os
 import environ
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-_!n5wpf%!_v_a60$jm6-y$f)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'findly.onrender.com'])
 
 # Application definition
 
@@ -36,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'rest_framework',
 
     'core',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ WhiteNoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,17 +86,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Findly.wsgi.application'
 
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Findly',
-        'USER': 'postgres',
-        'PASSWORD': 'ainee123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+# ================= DATABASE =================
+# Uses DATABASE_URL env var on Render, falls back to local PostgreSQL
+DATABASE_URL = env('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'Findly',
+            'USER': 'postgres',
+            'PASSWORD': env('DB_PASSWORD', default='ainee123'),
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 
 # Password validation
@@ -121,10 +131,15 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # ✅ added
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# ================= STATIC FILES =================
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # ✅ WhiteNoise
+
+# ================= MEDIA FILES =================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Custom User Model (core app)
 AUTH_USER_MODEL = 'core.User'
@@ -133,8 +148,8 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_REDIRECT_URL = 'dashboard:home'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
+
 # ================= EMAIL CONFIG =================
-# To send real emails, we use Gmail SMTP backend instead of console
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -142,7 +157,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='aineemakwana23@gmail.com')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='xylh cgae evfu qeqp')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
