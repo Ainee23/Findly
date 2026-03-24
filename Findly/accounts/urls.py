@@ -11,6 +11,13 @@ from .views import (
     register,
 )
 
+from .forms import (
+    LoginForm,
+    ProfileForm,
+    RegisterForm,
+    CustomPasswordResetForm,
+)
+
 app_name = "accounts"
 
 urlpatterns = [
@@ -47,7 +54,8 @@ urlpatterns += [
         auth_views.PasswordResetView.as_view(
             template_name="accounts/password_reset_form.html",
             email_template_name="accounts/password_reset_email.html",
-            success_url="/accounts/password-reset/done/"
+            success_url="/accounts/password-reset/done/",
+            form_class=CustomPasswordResetForm
         ),
         name="password_reset",
     ),

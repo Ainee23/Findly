@@ -39,10 +39,9 @@ class RegisterForm(forms.ModelForm):
 
         return cleaned_data
 
-    # ✅ PREVENT DUPLICATE EMAIL
+    # ✅ PREVENT DUPLICATE EMAIL AND LOWERCASE IT
     def clean_email(self):
-
-        email = self.cleaned_data.get("email")
+        email = self.cleaned_data.get("email").lower()
 
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(
@@ -55,6 +54,7 @@ class RegisterForm(forms.ModelForm):
     def save(self, commit=True):
 
         user = super().save(commit=False)
+        user.email = user.email.lower()
 
         user.set_password(
             self.cleaned_data["password"]
@@ -73,6 +73,23 @@ class LoginForm(AuthenticationForm):
         label="Email",
         widget=forms.EmailInput(attrs={"autofocus": True, "placeholder": "Email address"}),
     )
+
+    def clean(self):
+        # Force email to lowercase before authenticating
+        username = self.cleaned_data.get('username')
+        if username:
+            self.cleaned_data['username'] = username.lower()
+            self.data = self.data.copy()
+            self.data['username'] = username.lower()
+        return super().clean()
+
+from django.contrib.auth.forms import PasswordResetForm
+class CustomPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
+        try:
+            super().send_mail(subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name)
+        except Exception as e:
+            print(f"Error sending password reset email to {to_email}: {e}")
 
 
 class ProfileForm(forms.ModelForm):
