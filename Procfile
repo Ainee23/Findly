@@ -1,1 +1,1 @@
-web: gunicorn Findly.wsgi
+web: cd Findly && gunicorn Findly.wsgi:application
