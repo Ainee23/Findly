@@ -71,7 +71,7 @@ def send_otp(user):
         send_mail(
             "Findly Login OTP",
             f"Your OTP is {otp}",
-            "findly@gmail.com",
+            None,
             [user.email],
             fail_silently=True,
         )
