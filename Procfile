@@ -1,1 +1,1 @@
-web: cd Findly && gunicorn Findly.wsgi:application
+web: gunicorn --chdir Findly Findly.wsgi:application
