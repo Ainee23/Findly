@@ -32,7 +32,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-_!n5wpf%!_v_a60$jm6-y$f)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'findly.onrender.com'])
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
