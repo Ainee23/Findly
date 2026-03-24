@@ -73,7 +73,7 @@ def send_otp(user):
             f"Your OTP is {otp}",
             "findly@gmail.com",
             [user.email],
-            fail_silently=False,
+            fail_silently=True,
         )
     except Exception as e:
         print(f"Error sending OTP email: {e}")
