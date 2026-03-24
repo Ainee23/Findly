@@ -67,13 +67,16 @@ def send_otp(user):
         otp=otp,
     )
 
-    send_mail(
-        "Findly Login OTP",
-        f"Your OTP is {otp}",
-        "findly@gmail.com",
-        [user.email],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            "Findly Login OTP",
+            f"Your OTP is {otp}",
+            "findly@gmail.com",
+            [user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Error sending OTP email: {e}")
 
 
 # ---------------- LOGIN WITH OTP ----------------
