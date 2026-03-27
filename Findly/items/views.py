@@ -97,7 +97,7 @@ def item_list(request):
     
 def item_detail(request, pk):
 
-    item = Item.objects.get(pk=pk)
+    item = get_object_or_404(Item, pk=pk)
 
     # get latest verification for this item
     verification = ItemVerification.objects.filter(
@@ -233,7 +233,7 @@ def update_location(request, pk):
 @login_required
 def change_status(request, pk, status):
 
-    item = Item.objects.get(id=pk)
+    item = get_object_or_404(Item, id=pk)
 
     if item.owner != request.user:
         return redirect("items:detail", pk=pk)

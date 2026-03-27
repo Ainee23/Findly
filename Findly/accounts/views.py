@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.views import (
     LoginView,
     LogoutView,
@@ -113,6 +115,7 @@ def verify_otp(request):
         obj = EmailOTP.objects.filter(
             user_id=user_id,
             otp=otp,
+            created__gte=timezone.now() - timedelta(minutes=10),
         ).last()
 
         if obj:
