@@ -6,15 +6,15 @@ A full-stack Django web application for **lost & found item tracking**, featurin
 
 ## 🚀 Features
 
-- 🔐 Email-based authentication with OTP verification
-- 📦 Item listing, browsing, search, and claim requests
-- 💬 Real-time WhatsApp-style messaging (edit & delete support)
-- 🔔 Live notifications (messages, claims, system alerts)
-- 📊 User & admin dashboards with activity metrics
-- ⭐ User reviews and ratings system
-- 📷 QR code generation and scanning for items/profiles
-- 🤖 AI-powered item matching
-- 🌗 Dark mode / Light mode support
+- 🔐 **Email-based authentication** with OTP verification
+- 📦 **Item Management**: Listing, browsing, search, and claim requests
+- 💬 **Real-time Messaging**: WhatsApp-style interface with edit & delete support natively without page reloads
+- 🔔 **Live Notifications**: Alerts for messages, claims, and system events
+- 📊 **Dashboards**: Comprehensive overview panels with metrics for standard users and administrators
+- ⭐ **Reviews & Ratings**: Fostering continuous trust and safety on the platform
+- 📷 **QR Code Integration**: Generation and scanning for items and profiles
+- 🤖 **AI-powered Engine**: Smart suggestions and computational views
+- 🌗 **UI & Accessibility**: Modern "TheyMakeDesign" soft, airy aesthetic with Dark mode / Light mode support
 
 ---
 
@@ -22,13 +22,38 @@ A full-stack Django web application for **lost & found item tracking**, featurin
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 6.0.2, Django REST Framework |
-| Database | PostgreSQL (local) / Render PostgreSQL (production) |
-| Storage | WhiteNoise (static) + Django MEDIA (uploads) |
-| Auth | Custom User model (email-based) |
-| Email | Gmail SMTP via App Password |
-| Deployment | Render + Gunicorn |
-| Frontend | Vanilla CSS, Bootstrap Icons, Inter Font |
+| **Backend** | Django 6.0.2, Django REST Framework |
+| **Database** | PostgreSQL (local) / Render PostgreSQL (production) |
+| **Storage** | WhiteNoise (static) + Django MEDIA (uploads) |
+| **Auth** | Custom User model (email-based) |
+| **Email** | Gmail SMTP via App Password |
+| **Deployment** | Render + Gunicorn |
+| **Frontend** | Tailwind CSS (via CDN), Bootstrap Icons, Inter Font |
+
+---
+
+## 📁 Core Application Architecture
+
+The project is organized into modular Django apps to separate concerns efficiently:
+
+- **`accounts/`**: Handles all user authentication models and views. Uses a custom User model (email as primary identifier).
+- **`items/`**: The core application. Users can browse items, search for specific listings, list their own items, and submit claim requests.
+- **`messaging/`**: A robust chat engine enabling direct user-to-user communication. Features speech bubbles, async editing, and native deletion.
+- **`notifications/`**: A centralized alerting system delivering dynamically rendered notification cards.
+- **`dashboard/`**: Provides comprehensive overview panels indicating recent activity for both users and admins.
+- **`reviews/`**: Allows users to leave feedback, ratings, and comments.
+- **`qr/`**: Integrates QR code generation and scanning directly into the application.
+- **`ai/`**: A dedicated application for AI-powered features and deep integrations.
+- **`core/`**: Contains the foundational templates, fallback views, and standard site logic.
+
+---
+
+## 🎨 UI / UX Design Principles
+
+- Uses a unified **"TheyMakeDesign"** soft, airy aesthetic.
+- **Tailwind CSS** is the primary styling engine, leveraging utility-first classes.
+- **Dark Mode and Light Mode** are fully supported locally via local storage and system preference detection.
+- **Dynamic JavaScript features** (like Edit/Delete modals) utilize asynchronous JSON Fetch API requests without complex dependencies.
 
 ---
 
@@ -45,7 +70,7 @@ source venv/bin/activate     # Mac/Linux
 
 ### 2. Install dependencies
 ```bash
-pip install -r Findly/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Create `.env` file inside `Findly/` (next to `manage.py`)
@@ -66,11 +91,12 @@ DB_PASSWORD=your_postgres_password
 ### 4. Apply migrations and run
 ```bash
 cd Findly
-..\venv\Scripts\python manage.py migrate
-..\venv\Scripts\python manage.py runserver
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
 ```
 
-> ✅ Always use `..\venv\Scripts\python` to ensure the venv Python is used, not the system Python.
+> ✅ If using `venv`, make sure it's activated, or run `..\venv\Scripts\python manage.py <command>`.
 
 ---
 
@@ -103,29 +129,6 @@ pip install -r requirements.txt && python manage.py collectstatic --no-input && 
 
 # Start command:
 gunicorn Findly.wsgi:application
-```
-
----
-
-## 📁 Project Structure
-
-```
-Findly/
-├── Findly/           # Django project (settings, urls, wsgi)
-├── core/             # Custom User model, middleware, home views
-├── accounts/         # Auth: login, register, OTP verify, profile
-├── items/            # Item listing, search, claims
-├── messaging/        # Direct messaging (edit/delete)
-├── notifications/    # Alerts and notification feed
-├── dashboard/        # User & admin dashboards
-├── reviews/          # Ratings and reviews
-├── qr/               # QR code generation/scanning
-├── ai/               # AI matching engine
-├── templates/        # All HTML templates
-├── static/           # CSS, JS, images
-├── media/            # User-uploaded files (gitignored)
-├── requirements.txt
-└── .env              # ← Never commit this!
 ```
 
 ---
