@@ -4,5 +4,7 @@
     ],
     "python.autoComplete.extraPaths": [
         "./Findly"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off",
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe"
 }
