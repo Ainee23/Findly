@@ -74,3 +74,16 @@ from django.views.static import serve
 urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
+
+# -- TEMPORARY ENDPOINT TO CREATE ADMIN --
+from django.http import HttpResponse
+def create_admin(request):
+    from core.models import User
+    if not User.objects.filter(email="owner@findly.com").exists():
+        User.objects.create_superuser("owner@findly.com", "findly123")
+        return HttpResponse("✅ Admin created! Email: <b>owner@findly.com</b> | Password: <b>findly123</b>")
+    return HttpResponse("⚠️ Admin already exists! Try logging in.")
+
+urlpatterns += [
+    path("setup-admin-user/", create_admin),
+]
