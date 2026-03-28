@@ -79,10 +79,15 @@ urlpatterns += [
 from django.http import HttpResponse
 def create_admin(request):
     from core.models import User
-    if not User.objects.filter(email="owner@findly.com").exists():
-        User.objects.create_superuser("owner@findly.com", "findly123")
+    user, created = User.objects.get_or_create(email="owner@findly.com")
+    user.set_password("findly123")
+    user.is_staff = True
+    user.is_superuser = True
+    user.role = "owner"
+    user.save()
+    if created:
         return HttpResponse("✅ Admin created! Email: <b>owner@findly.com</b> | Password: <b>findly123</b>")
-    return HttpResponse("⚠️ Admin already exists! Try logging in.")
+    return HttpResponse("✅ Admin password reset to <b>findly123</b>! Please try logging in now at /login/")
 
 urlpatterns += [
     path("setup-admin-user/", create_admin),
