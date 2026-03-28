@@ -48,7 +48,7 @@
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/findly.git
+git clone https://github.com/Ainee23/findly.git
 cd findly
 python -m venv venv
 venv\Scripts\activate        # Windows
