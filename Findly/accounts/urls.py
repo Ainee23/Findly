@@ -28,7 +28,6 @@ urlpatterns = [
     path("settings/", views.settings_view, name="settings"),
     path("password/change/", UserPasswordChangeView.as_view(), name="password_change"),
     path("password/change/done/", UserPasswordChangeDoneView.as_view(), name="password_change_done"),
-    path("verify/",views.verify_otp,name="verify_otp"),
 ]
 
 urlpatterns += [

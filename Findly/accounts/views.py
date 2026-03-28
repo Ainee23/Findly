@@ -16,9 +16,6 @@ from .forms import LoginForm, ProfileForm, RegisterForm
 
 User = get_user_model()
 
-import random
-from django.core.mail import send_mail
-from .models import EmailOTP
 from .models import Profile
 from items.models import Item, ClaimRequest
 from reviews.models import Review
@@ -31,17 +28,11 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            user = form.save()
+            form.save()
 
-            # send otp for verification
-            send_otp(user)
+            messages.success(request, "Account created! Please log in.")
 
-            # save user in session
-            request.session["otp_user"] = user.id
-
-            messages.success(request, "Account created! Please verify your email.")
-
-            return redirect("accounts:verify_otp")
+            return redirect("accounts:login")
 
     else:
         form = RegisterForm()
@@ -53,35 +44,7 @@ def register(request):
     )
 
 
-# ---------------- SEND OTP ----------------
-
-def send_otp(user):
-
-    otp = str(random.randint(100000, 999999))
-    
-    # ✅ Add a highly visible print statement for local development
-    print(f"\n=========================================")
-    print(f"🔑 OTP FOR {user.email}: {otp}")
-    print(f"=========================================\n")
-
-    EmailOTP.objects.create(
-        user=user,
-        otp=otp,
-    )
-
-    try:
-        send_mail(
-            "Findly Login OTP",
-            f"Your OTP is {otp}",
-            None,
-            [user.email],
-            fail_silently=True,
-        )
-    except Exception as e:
-        print(f"Error sending OTP email: {e}")
-
-
-# ---------------- LOGIN WITH OTP ----------------
+# ---------------- LOGIN ----------------
 
 class UserLoginView(LoginView):
 
@@ -89,56 +52,11 @@ class UserLoginView(LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
-    def form_valid(self, form):
-
-        user = form.get_user()
-
-        # send otp
-        send_otp(user)
-
-        # save user in session
-        self.request.session["otp_user"] = user.id
-
-        return redirect("accounts:verify_otp")
-
-
-# ---------------- VERIFY OTP ----------------
-
-def verify_otp(request):
-
-    if request.method == "POST":
-
-        otp = request.POST.get("otp")
-
-        user_id = request.session.get("otp_user")
-
-        obj = EmailOTP.objects.filter(
-            user_id=user_id,
-            otp=otp,
-            created__gte=timezone.now() - timedelta(minutes=10),
-        ).last()
-
-        if obj:
-
-            user = obj.user
-
-            login(request, user)
-
-            messages.success(request, "Login successful")
-
-            # redirect based on role
-            if hasattr(user, "role") and user.role == "owner":
-                return redirect("dashboard:admin_overview")
-
-            return redirect("dashboard:home")
-
-        else:
-            messages.error(request, "Invalid OTP")
-
-    return render(
-        request,
-        "accounts/verify.html",
-    )
+    def get_success_url(self):
+        user = self.request.user
+        if hasattr(user, "role") and user.role == "owner":
+            return reverse_lazy("dashboard:admin_overview")
+        return reverse_lazy("dashboard:home")
 
 
 # ---------------- LOGOUT ----------------
