@@ -20,16 +20,21 @@ from .models import Message, Thread
 User = get_user_model()  # ✅ Use custom email-based User
 
 
-@login_required
-def inbox(request):
-    from django.db.models import Q, Count
-    threads = (
-        Thread.objects.filter(participants=request.user)
+def get_user_threads(user):
+    from django.db.models import Prefetch, Q, Count
+    return (
+        Thread.objects.filter(participants=user)
         .annotate(last_msg_at=Max("messages__created_at"))
-        .annotate(unread_count=Count('messages', filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user)))
+        .annotate(unread_count=Count('messages', filter=Q(messages__is_read=False) & ~Q(messages__sender=user)))
+        .prefetch_related(Prefetch("participants", queryset=User.objects.select_related("profile")))
         .order_by("-last_msg_at", "-updated_at")
     )
-    return render(request, "messaging/inbox.html", {"threads": threads})
+
+
+@login_required
+def inbox(request):
+    threads = get_user_threads(request.user)
+    return render(request, "messaging/inbox.html", {"threads": threads, "active_thread": None})
 
 
 @login_required
@@ -39,29 +44,53 @@ def thread_detail(request, pk: int):
     # Mark messages as read
     thread.messages.exclude(sender=request.user).update(is_read=True)
     
+    # Check if blocked
+    from .models import BlockedUser
+    other_participant = thread.participants.exclude(pk=request.user.pk).first()
+    is_blocked = False
+    if other_participant:
+        is_blocked = BlockedUser.objects.filter(
+            blocker=other_participant, blocked=request.user
+        ).exists() or BlockedUser.objects.filter(
+            blocker=request.user, blocked=other_participant
+        ).exists()
+
     msgs = thread.messages.select_related("sender").order_by("created_at")
     if request.method == "POST":
-        form = MessageForm(request.POST)
+        if is_blocked:
+            messages.error(request, "You cannot send messages in this thread.")
+            return redirect("messaging:thread", pk=thread.pk)
+            
+        form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
             msg: Message = form.save(commit=False)
             msg.thread = thread
             msg.sender = request.user
-            msg.save()
-            ActivityLog.objects.create(user=request.user, action='message_sent', description=f"Sent a message inside a thread")
-            thread.save(update_fields=["updated_at"])
-            for u in thread.participants.exclude(pk=request.user.pk):
-                notify(
-                    u,
-                    f"New message from {request.user.email}",  # ✅ email not username
-                    link=f"/messaging/thread/{thread.pk}/"
-                )
-                send_mail(
-                    subject="New message on Findly",
-                    message=f"You have a new message from {request.user.email} regarding an item. Log in to Findly to view and reply.",
-                    from_email="findly@gmail.com",
-                    recipient_list=[u.email],
-                    fail_silently=True,
-                )
+            
+            # Handle possible system/AI preset messages
+            body_text = form.cleaned_data.get("body", "").strip()
+            
+            # If there's an image, or there's text
+            if request.FILES.get("image") or body_text:
+                if request.FILES.get("image"):
+                    msg.image = request.FILES["image"]
+                msg.save()
+                
+                ActivityLog.objects.create(user=request.user, action='message_sent', description=f"Sent a message inside a thread")
+                thread.save(update_fields=["updated_at"])
+                for u in thread.participants.exclude(pk=request.user.pk):
+                    notify(
+                        u,
+                        f"New message from {request.user.email}",  # ✅ email not username
+                        link=f"/messaging/thread/{thread.pk}/"
+                    )
+                    send_mail(
+                        subject="New message on Findly",
+                        message=f"You have a new message from {request.user.email} regarding an item. Log in to Findly to view and reply.",
+                        from_email="findly@gmail.com",
+                        recipient_list=[u.email],
+                        fail_silently=True,
+                    )
             return redirect("messaging:thread", pk=thread.pk)
     else:
         form = MessageForm()
@@ -75,11 +104,13 @@ def thread_detail(request, pk: int):
         request,
         "messaging/thread.html",
         {
-            "thread": thread, 
+            "threads": get_user_threads(request.user),
+            "active_thread": thread,
             "messages": msgs, 
             "form": form,
             "other_participant": other_participant,
-            "is_online": is_online
+            "is_online": is_online,
+            "is_blocked": is_blocked
         }
     )
 
@@ -141,3 +172,39 @@ def delete_message(request, message_id: int):
     
     msg.delete()
     return JsonResponse({"success": True})
+
+
+@login_required
+@require_POST
+def block_user(request, user_id: int):
+    from .models import BlockedUser
+    user_to_block = get_object_or_404(User, pk=user_id)
+    if user_to_block == request.user:
+        return JsonResponse({"error": "Cannot block yourself"}, status=400)
+    
+    blocked, created = BlockedUser.objects.get_or_create(blocker=request.user, blocked=user_to_block)
+    if created:
+        messages.success(request, f"You have blocked {user_to_block.first_name or user_to_block.email}.")
+    else:
+        blocked.delete()
+        messages.success(request, f"You have unblocked {user_to_block.first_name or user_to_block.email}.")
+    
+    return redirect("messaging:inbox")
+
+
+@login_required
+@require_POST
+def report_user(request, user_id: int):
+    from .models import Report
+    user_to_report = get_object_or_404(User, pk=user_id)
+    thread_id = request.POST.get("thread_id")
+    reason = request.POST.get("reason", "Inappropriate behavior")
+    
+    Report.objects.create(
+        reporter=request.user,
+        reported_user=user_to_report,
+        thread_id=thread_id if thread_id else None,
+        reason=reason
+    )
+    messages.success(request, "Report submitted successfully. We will review it shortly.")
+    return redirect("messaging:inbox")

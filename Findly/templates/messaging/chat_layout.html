@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Messages - Findly{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto h-[calc(100vh-140px)] min-h-[500px] flex bg-white dark:bg-[#111b21] rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+    
+    <!-- Sidebar / Chat List -->
+    <div class="w-full md:w-[350px] lg:w-[400px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-gray-700 bg-white dark:bg-[#111b21] md:flex transition-all duration-300 {% if active_thread %}hidden md:flex{% else %}flex{% endif %}" id="chat-sidebar">
+        
+        <!-- Sidebar Header -->
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-[#202c33] flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-[#e9edef] tracking-tight">Messages</h2>
+            <div class="w-10 h-10 bg-indigo-50 dark:bg-[#2a3942] text-indigo-500 dark:text-[#e9edef] rounded-full flex items-center justify-center">
+                <i class="bi bi-chat-text text-lg"></i>
+            </div>
+        </div>
+
+        <!-- Search Bar (Visual Only for now) -->
+        <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-[#111b21]">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="bi bi-search text-gray-400 dark:text-[#8696a0]"></i>
+                </div>
+                <input type="text" class="w-full bg-gray-100 dark:bg-[#202c33] text-gray-800 dark:text-[#e9edef] border-transparent focus:border-transparent focus:ring-0 rounded-lg pl-10 py-1.5 text-sm placeholder-gray-500 dark:placeholder-[#8696a0]" placeholder="Search or start new chat">
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div class="flex-1 overflow-y-auto bg-white dark:bg-[#111b21]">
+            {% for th in threads %}
+                {% with other_p=th.participants.all|first %}
+                {% if th.participants.count > 1 %}
+                    {% for p in th.participants.all %}
+                        {% if p != request.user %}
+                            <a href="{% url 'messaging:thread' th.pk %}" class="block group border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-[#2a3942] transition-colors {% if active_thread.pk == th.pk %}bg-gray-100 dark:bg-[#2a3942]{% endif %}">
+                                <div class="p-3 sm:p-4 flex items-center space-x-3">
+                                    <div class="relative flex-shrink-0">
+                                        {% if p.profile.image and p.profile.image.url %}
+                                            <img src="{{ p.profile.image.url }}" class="w-12 h-12 rounded-full object-cover shadow-sm">
+                                        {% else %}
+                                            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300 flex items-center justify-center font-bold text-lg shadow-inner">
+                                                {{ p.first_name|default:p.email|make_list|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-baseline mb-0.5">
+                                            <h3 class="text-[16px] font-semibold text-gray-800 dark:text-[#e9edef] truncate pr-2">
+                                                {{ p.first_name|default:p.email }}
+                                            </h3>
+                                            <span class="text-[12px] text-gray-400 dark:text-[#8696a0] whitespace-nowrap">{% if th.last_msg_at %}{{ th.last_msg_at|timesince }}{% endif %}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <p class="text-[14px] text-gray-500 dark:text-[#8696a0] truncate mr-2">
+                                                {% if th.item %}
+                                                    <i class="bi bi-tag-fill text-indigo-400 mr-1 text-[10px]"></i> {{ th.item.title }}
+                                                {% else %}
+                                                    <i class="bi bi-chat-dots text-gray-400 mr-1 text-[10px]"></i> General
+                                                {% endif %}
+                                            </p>
+                                            {% if th.unread_count > 0 %}
+                                                <span class="bg-[#00a884] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ th.unread_count }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            {% empty %}
+                <div class="p-8 text-center flex flex-col items-center justify-center h-full text-gray-400 dark:text-[#8696a0]">
+                    <i class="bi bi-chat-square-dots text-4xl mb-3"></i>
+                    <p class="text-sm">No conversations yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex col {% if not active_thread %}hidden md:flex{% else %}flex w-full{% endif %} bg-[#f0f2f5] dark:bg-[#0b141a]">
+        {% block chat_area %}
+            <!-- Default Placeholder when no chat is selected -->
+            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center relative w-full border-b-[6px] border-[#00a884] bg-white dark:bg-[#111b21]">
+                <!-- Decorative background elements -->
+                <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: url('data:image/svg+xml;utf8,<svg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'><g fill=\'none\' fill-rule=\'evenodd\'><g fill=\'%23000000\' fill-opacity=\'1\'><path d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/></g></g></svg>');"></div>
+                
+                <div class="w-48 h-48 mb-6 mx-auto rounded-full bg-indigo-50 dark:bg-gray-800 flex items-center justify-center shadow-lg relative z-10">
+                    <i class="bi bi-shield-check text-[#00a884] text-6xl"></i>
+                </div>
+                <h2 class="text-3xl font-light text-gray-800 dark:text-[#e9edef] mb-3 relative z-10">Findly Secure Messaging</h2>
+                <p class="text-gray-500 dark:text-[#8696a0] max-w-md mb-6 relative z-10">Select a chat from the sidebar to view your conversation or coordinate a safe return of a lost item.</p>
+                <div class="bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-1 flex items-center text-xs text-gray-500 dark:text-[#8696a0] relative z-10">
+                    <i class="bi bi-lock-fill mr-1.5 text-gray-400"></i> End-to-end encrypted messaging
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+
+</div>
+
+<!-- Image Preview Modal Base -->
+<div id="imagePreviewModal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <button onclick="closeImagePreview()" class="absolute top-4 right-4 text-white/70 hover:text-white p-2">
+        <i class="bi bi-x-lg text-2xl"></i>
+    </button>
+    <img id="previewImage" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+</div>
+
+<script>
+    function openImagePreview(src) {
+        document.getElementById('previewImage').src = src;
+        document.getElementById('imagePreviewModal').classList.remove('hidden');
+    }
+    function closeImagePreview() {
+        document.getElementById('imagePreviewModal').classList.add('hidden');
+    }
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeImagePreview();
+    });
+</script>
+{% endblock %}
