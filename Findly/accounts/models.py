@@ -29,7 +29,6 @@ class Profile(models.Model):
 
     image = models.ImageField(
         upload_to="profiles/",
-        default="default.png",
         blank=True,
         null=True
     )
