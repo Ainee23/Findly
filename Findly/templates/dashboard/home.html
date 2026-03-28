@@ -26,7 +26,7 @@
             </div>
             <div class="mt-auto flex items-center justify-between text-[15px] text-[#6C63FF] dark:text-[#00C9FF] font-semibold">
                 <span>Manage your items</span>
-                <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-[#6C63FF] group-hover:text-white transition-colors duration-300">
+                <div class="w-8 h-8 rounded-full bg-[#ffffff] dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-[#6C63FF] group-hover:text-white transition-colors duration-300">
                     <i class="bi bi-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
                 </div>
             </div>
@@ -48,7 +48,7 @@
             </div>
             <div class="mt-auto flex items-center justify-between text-[15px] text-[#00C9FF] dark:text-cyan-400 font-semibold">
                 <span>Go to Inbox</span>
-                <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-[#00C9FF] group-hover:text-white transition-colors duration-300">
+                <div class="w-8 h-8 rounded-full bg-[#ffffff] dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-[#00C9FF] group-hover:text-white transition-colors duration-300">
                     <i class="bi bi-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
                 </div>
             </div>
@@ -70,7 +70,7 @@
             </div>
             <div class="mt-auto flex items-center justify-between text-[15px] text-amber-500 dark:text-amber-400 font-semibold">
                 <span>View all notifications</span>
-                <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
+                <div class="w-8 h-8 rounded-full bg-[#ffffff] dark:bg-gray-700 flex items-center justify-center shadow-sm group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
                     <i class="bi bi-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
                 </div>
             </div>
@@ -85,7 +85,7 @@
     <div class="space-y-4">
         <h3 class="text-lg font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">Quick Actions</h3>
         
-        <a href="{% url 'items:list' %}" class="flex items-center w-full p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-2xl text-[15px] font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 hover:border-indigo-100 hover:shadow-md dark:hover:bg-gray-700 focus:outline-none transition-all duration-300 group">
+        <a href="{% url 'items:list' %}" class="flex items-center w-full p-4 bg-[#ffffff] dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-2xl text-[15px] font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 hover:border-indigo-100 hover:shadow-md dark:hover:bg-gray-700 focus:outline-none transition-all duration-300 group">
             <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mr-4 text-indigo-500 dark:text-indigo-400 group-hover:bg-white dark:group-hover:bg-indigo-900/50 group-hover:scale-105 transition-all">
                 <i class="bi bi-search text-lg"></i>
             </div>
@@ -99,7 +99,7 @@
             Post a New Item
         </a>
         
-        <a href="{% url 'accounts:profile' %}" class="flex items-center w-full p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-2xl text-[15px] font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 hover:border-gray-200 hover:shadow-md dark:hover:bg-gray-700 focus:outline-none transition-all duration-300 group">
+        <a href="{% url 'accounts:profile' %}" class="flex items-center w-full p-4 bg-[#ffffff] dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-2xl text-[15px] font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 hover:border-gray-200 hover:shadow-md dark:hover:bg-gray-700 focus:outline-none transition-all duration-300 group">
             <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center mr-4 text-gray-500 dark:text-gray-400 group-hover:bg-white dark:group-hover:bg-gray-600 group-hover:scale-105 transition-all">
                 <i class="bi bi-person text-lg"></i>
             </div>
@@ -112,7 +112,7 @@
         <h3 class="text-lg font-bold tracking-tight text-gray-900 dark:text-white mb-4 transition-colors duration-300">Recent Activity</h3>
         
         {% if data.recent_activity %}
-        <div class="bg-white dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+        <div class="bg-[#ffffff] dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
             <ul class="divide-y divide-gray-100 dark:divide-gray-700">
                 {% for activity in data.recent_activity %}
                 <li class="p-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
@@ -150,7 +150,7 @@
             </div>
         </div>
         {% else %}
-        <div class="bg-white dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl p-8 border border-gray-100 dark:border-gray-700 h-full min-h-[250px] flex flex-col items-center justify-center text-center transition-colors duration-300">
+        <div class="bg-[#ffffff] dark:bg-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-3xl p-8 border border-gray-100 dark:border-gray-700 h-full min-h-[250px] flex flex-col items-center justify-center text-center transition-colors duration-300">
             
             <div class="w-20 h-20 rounded-3xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 flex items-center justify-center mb-5 transition-colors duration-300">
                 <i class="bi bi-activity text-4xl text-gray-300 dark:text-gray-500"></i>

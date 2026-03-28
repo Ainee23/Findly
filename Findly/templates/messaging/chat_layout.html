@@ -4,10 +4,10 @@
 {% block title %}Messages - Findly{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto h-[calc(100vh-140px)] min-h-[500px] flex bg-white dark:bg-[#111b21] rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+<div class="max-w-6xl mx-auto h-[calc(100vh-140px)] min-h-[500px] flex bg-[#ffffff] dark:bg-[#111b21] rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
     
     <!-- Sidebar / Chat List -->
-    <div class="w-full md:w-[350px] lg:w-[400px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-gray-700 bg-white dark:bg-[#111b21] md:flex transition-all duration-300 {% if active_thread %}hidden md:flex{% else %}flex{% endif %}" id="chat-sidebar">
+    <div class="w-full md:w-[350px] lg:w-[400px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-gray-700 bg-[#ffffff] dark:bg-[#111b21] md:flex transition-all duration-300 {% if active_thread %}hidden md:flex{% else %}flex{% endif %}" id="chat-sidebar">
         
         <!-- Sidebar Header -->
         <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-[#202c33] flex items-center justify-between">
@@ -18,7 +18,7 @@
         </div>
 
         <!-- Search Bar (Visual Only for now) -->
-        <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-[#111b21]">
+        <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-[#ffffff] dark:bg-[#111b21]">
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="bi bi-search text-gray-400 dark:text-[#8696a0]"></i>
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Chat List -->
-        <div class="flex-1 overflow-y-auto bg-white dark:bg-[#111b21]">
+        <div class="flex-1 overflow-y-auto bg-[#ffffff] dark:bg-[#111b21]">
             {% for th in threads %}
                 {% with other_p=th.participants.all|first %}
                 {% if th.participants.count > 1 %}
@@ -84,7 +84,7 @@
     <div class="flex-1 flex col {% if not active_thread %}hidden md:flex{% else %}flex w-full{% endif %} bg-[#f0f2f5] dark:bg-[#0b141a]">
         {% block chat_area %}
             <!-- Default Placeholder when no chat is selected -->
-            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center relative w-full border-b-[6px] border-[#00a884] bg-white dark:bg-[#111b21]">
+            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center relative w-full border-b-[6px] border-[#00a884] bg-[#ffffff] dark:bg-[#111b21]">
                 <!-- Decorative background elements -->
                 <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: url('data:image/svg+xml;utf8,<svg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'><g fill=\'none\' fill-rule=\'evenodd\'><g fill=\'%23000000\' fill-opacity=\'1\'><path d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/></g></g></svg>');"></div>
                 

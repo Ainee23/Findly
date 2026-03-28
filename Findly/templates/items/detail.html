@@ -177,6 +177,12 @@
                         {% endif %}
                     </div>
 
+                {% elif not user.is_authenticated %}
+                    <div class="alert alert-info mt-3 small shadow-sm border-0 bg-white/50 dark:bg-gray-800/50 dark:text-gray-300 backdrop-blur-sm">
+                        <i class="bi bi-info-circle me-1"></i> <strong>Note:</strong> Log in to contact this user.
+                    </div>
+                {% endif %}
+
                 {% if user_claim %}
                     <div class="alert alert-info mt-3 small shadow-sm border-0 bg-white/50 backdrop-blur-sm">
                         {% if user_claim.approved and not user_claim.pickup_confirmed %}
@@ -211,8 +217,6 @@
                     </div>
                 {% endif %}
 
-                {% endif %}
-
                 {% if user == item.owner %}
                 <div class="d-grid gap-2 mb-3">
                     <a href="{% url 'items:edit' item.pk %}" class="btn btn-outline-secondary rounded-pill fw-semibold hover:-translate-y-1 transition-transform" style="letter-spacing:0.01em;">
@@ -220,21 +224,21 @@
                     </a>
                 </div>
                 
-                <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small border-0 bg-white/50 shadow-sm backdrop-blur-sm">
+                <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small border-0 bg-white/50 dark:bg-gray-800/50 dark:text-gray-300 shadow-sm backdrop-blur-sm">
                     <i class="bi bi-info-circle text-primary me-1"></i> This is your posted item.
                 </div>
 
                 {% if claims %}
-                <div class="card shadow-sm border-0 mb-4 mt-3 bg-white/80 backdrop-blur-md rounded-xl">
+                <div class="card shadow-sm border-0 mb-4 mt-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl">
                     <div class="card-header bg-transparent border-bottom-0 pt-3 pb-0">
-                        <strong class="text-gray-800 fs-6">Claims ({{ claims.count }})</strong>
+                        <strong class="text-gray-800 dark:text-gray-200 fs-6">Claims ({{ claims.count }})</strong>
                     </div>
                     <div class="card-body">
                         {% for claim in claims %}
-                            <div class="border rounded-lg p-3 mb-3 bg-white shadow-sm hover:shadow-md transition-shadow">
+                            <div class="border dark:border-gray-700 rounded-lg p-3 mb-3 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <strong class="text-gray-900">{{ claim.sender.get_full_name|default:claim.sender.email }}</strong>
+                                        <strong class="text-gray-900 dark:text-white">{{ claim.sender.get_full_name|default:claim.sender.email }}</strong>
                                         <br>
                                         <small class="text-muted">{{ claim.created_at|date:"M d, Y H:i" }}</small>
                                     </div>
@@ -244,13 +248,13 @@
                                 </div>
 
                                 {% if claim.approved and claim.finder_lat and claim.finder_lng %}
-                                    <div class="mb-2 bg-gray-50 p-2 rounded">
+                                    <div class="mb-2 bg-gray-50 dark:bg-gray-900 p-2 rounded">
                                         <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Finder last location: {{ claim.finder_lat }}, {{ claim.finder_lng }}{% if claim.finder_location_updated_at %} (updated {{ claim.finder_location_updated_at|timesince }} ago){% endif %}</small>
                                     </div>
                                 {% endif %}
 
                                 {% if claim.message %}
-                                    <p class="mb-2 mt-2 text-gray-700 bg-gray-50 p-2 rounded border border-gray-100">{{ claim.message|linebreaksbr }}</p>
+                                    <p class="mb-2 mt-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-100 dark:border-gray-700">{{ claim.message|linebreaksbr }}</p>
                                 {% endif %}
 
                                 {% if claim.proof_image %}
@@ -268,13 +272,13 @@
                                 {% endif %}
 
                                 {% if claim.owner_response %}
-                                    <div class="alert alert-warning py-2 mt-2 border-0 bg-warning bg-opacity-10 text-dark">
+                                    <div class="alert alert-warning py-2 mt-2 border-0 bg-warning bg-opacity-10 text-dark dark:text-warning">
                                         <strong>Your note:</strong> {{ claim.owner_response|linebreaksbr }}
                                     </div>
                                 {% endif %}
 
                                 {% if not claim.approved and not claim.rejected %}
-                                    <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top border-gray-100">
+                                    <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top border-gray-100 dark:border-gray-700">
                                         <a href="{% url 'items:accept_claim' claim.pk %}" class="btn btn-sm btn-success rounded-pill fw-medium shadow-sm hover:-translate-y-1 transition-transform">Approve</a>
                                         <a href="{% url 'items:reject_claim' claim.pk %}" class="btn btn-sm btn-outline-danger rounded-pill fw-medium">Reject</a>
 
@@ -282,7 +286,7 @@
                                     </div>
 
                                     <div class="collapse mt-2" id="request-proof-{{ claim.pk }}">
-                                        <form method="post" action="{% url 'items:request_claim_proof' claim.pk %}" class="bg-gray-50 p-3 rounded mt-2">
+                                        <form method="post" action="{% url 'items:request_claim_proof' claim.pk %}" class="bg-gray-50 dark:bg-gray-900 p-3 rounded mt-2">
                                             {% csrf_token %}
                                             <div class="mb-2">
                                                 <textarea name="owner_response" class="form-control form-control-sm border-0 shadow-sm" rows="2" placeholder="Ask for a photo, receipt, or other proof">{{ claim.owner_response }}</textarea>
@@ -293,7 +297,7 @@
                                 {% endif %}
 
                                 {% if claim.pickup_confirmed %}
-                                    <div class="mt-3 pt-3 border-top border-gray-100">
+                                    <div class="mt-3 pt-3 border-top border-gray-100 dark:border-gray-700">
                                         <a href="{% url 'reviews:leave' claim.sender.pk %}" class="btn btn-sm btn-gradient rounded-pill text-white shadow-sm fw-medium">Leave a review for the finder</a>
                                     </div>
                                 {% endif %}
@@ -308,7 +312,7 @@
 
             <!-- QR Code button -->
             <div class="text-center mt-3 mb-2">
-                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 shadow-sm hover:-translate-y-1 transition-transform"
+                <button type="button" class="btn btn-outline-dark dark:btn-outline-light btn-sm rounded-pill px-3 shadow-sm hover:-translate-y-1 transition-transform"
                         data-bs-toggle="modal" data-bs-target="#itemQrModal">
                     <i class="bi bi-qr-code me-1"></i> Get QR Code
                 </button>
@@ -339,13 +343,13 @@
 <!-- Item QR Modal -->
 <div class="modal fade" id="itemQrModal" tabindex="-1" aria-labelledby="itemQrModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4">
+    <div class="modal-content text-center p-4 dark:bg-gray-800">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title w-100" id="itemQrModalLabel"><i class="bi bi-qr-code"></i> QR Code for "{{ item.title }}"</h5>
+        <h5 class="modal-title w-100 dark:text-white" id="itemQrModalLabel"><i class="bi bi-qr-code"></i> QR Code for "{{ item.title }}"</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <img src="{% url 'qr:item' item.pk %}" alt="Item QR Code" class="img-fluid border rounded p-2 shadow-sm" style="max-width:220px;">
+        <img src="{% url 'qr:item' item.pk %}" alt="Item QR Code" class="img-fluid border rounded p-2 shadow-sm bg-white" style="max-width:220px;">
         <p class="text-muted small mt-3">Share this QR code. Scanning it takes the finder directly to this item's page.</p>
         <a href="{% url 'qr:item' item.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3" download="qr_{{ item.pk }}.png">Download PNG</a>
       </div>
@@ -459,12 +463,12 @@
                             
                             const html = `
                             <a href="${match.url}" class="text-decoration-none">
-                                <div class="bg-white/50 backdrop-blur-sm border rounded-xl p-3 d-flex justify-content-between align-items-center hover:-translate-y-1 transition-transform shadow-sm">
+                                <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border dark:border-gray-700 rounded-xl p-3 d-flex justify-content-between align-items-center hover:-translate-y-1 transition-transform shadow-sm">
                                     <div class="text-truncate flex-grow-1 pe-2">
-                                        <h6 class="mb-1 fw-bold text-gray-800 text-truncate">${match.title}</h6>
+                                        <h6 class="mb-1 fw-bold text-gray-800 dark:text-gray-200 text-truncate">${match.title}</h6>
                                         <small class="text-muted d-block">Potential match found</small>
                                     </div>
-                                    <div class="badge bg-white shadow-sm rounded-pill px-3 py-2 fw-black fs-6 ${glowClass} border border-opacity-25 border-current">
+                                    <div class="badge bg-white dark:bg-gray-900 shadow-sm rounded-pill px-3 py-2 fw-black fs-6 ${glowClass} border border-opacity-25 border-current">
                                         ${fireIcon} ${match.score}%
                                     </div>
                                 </div>

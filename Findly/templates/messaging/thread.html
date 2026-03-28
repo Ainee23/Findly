@@ -1,7 +1,7 @@
 {% extends "messaging/chat_layout.html" %}
 
 {% block chat_area %}
-<div class="flex-1 flex flex-col h-full w-full relative bg-white dark:bg-[#0b141a]">
+<div class="flex-1 flex flex-col h-full w-full relative bg-[#ffffff] dark:bg-[#0b141a]">
 
     <!-- Chat Header -->
     <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-[#202c33] flex items-center justify-between z-10">
@@ -43,7 +43,7 @@
                     <i class="bi bi-three-dots-vertical text-lg"></i>
                 </button>
                 <!-- Dropdown Menu -->
-                <div id="header-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#2a3942] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50">
+                <div id="header-menu" class="hidden absolute right-0 mt-2 w-48 bg-[#ffffff] dark:bg-[#2a3942] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50">
                     {% if active_thread.item %}
                         <a href="{% url 'items:detail' active_thread.item.pk %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#202c33]">
                             <i class="bi bi-box-arrow-up-right mr-2 text-gray-400"></i> View Item Profile
@@ -66,10 +66,10 @@
 
     <!-- Action Bar (Findly specific buttons) -->
     <div class="bg-indigo-50/50 dark:bg-[#111b21] px-4 py-2 flex flex-wrap gap-2 border-b border-gray-100 dark:border-gray-800 z-10 shadow-sm relative">
-        <button onclick="triggerVerificationRequest()" class="flex-1 min-w-[120px] bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-gray-600 rounded-full py-1.5 px-3 text-xs font-medium text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#202c33] transition-colors flex items-center justify-center">
+        <button onclick="triggerVerificationRequest()" class="flex-1 min-w-[120px] bg-[#ffffff] dark:bg-[#2a3942] border border-gray-200 dark:border-gray-600 rounded-full py-1.5 px-3 text-xs font-medium text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#202c33] transition-colors flex items-center justify-center">
             <i class="bi bi-shield-check text-[#00a884] mr-1.5"></i> Request Verification
         </button>
-        <button onclick="document.getElementById('proofInput').click()" class="flex-1 min-w-[120px] bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-gray-600 rounded-full py-1.5 px-3 text-xs font-medium text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#202c33] transition-colors flex items-center justify-center">
+        <button onclick="document.getElementById('proofInput').click()" class="flex-1 min-w-[120px] bg-[#ffffff] dark:bg-[#2a3942] border border-gray-200 dark:border-gray-600 rounded-full py-1.5 px-3 text-xs font-medium text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#202c33] transition-colors flex items-center justify-center">
             <i class="bi bi-images text-indigo-500 mr-1.5"></i> Send Proof
         </button>
     </div>
@@ -95,7 +95,7 @@
             {% else %}
                 <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %} relative z-10">
                     <div class="max-w-[75%] sm:max-w-[65%] relative group" id="msg-container-{{ msg.pk }}">
-                        <div class="{% if msg.sender == request.user %}bg-[#dcf8c6] dark:bg-[#005c4b] rounded-tr-sm rounded-tl-xl rounded-b-xl{% else %}bg-white dark:bg-[#202c33] rounded-tl-sm rounded-tr-xl rounded-b-xl{% endif %} text-[#111b21] dark:text-[#e9edef] pb-1 shadow-[0_1px_1px_rgba(0,0,0,0.1)] text-[15px] relative overflow-hidden" id="msg-bubble-{{ msg.pk }}">
+                        <div class="{% if msg.sender == request.user %}bg-[#dcf8c6] dark:bg-[#005c4b] rounded-tr-sm rounded-tl-xl rounded-b-xl{% else %}bg-[#ffffff] dark:bg-[#202c33] rounded-tl-sm rounded-tr-xl rounded-b-xl{% endif %} text-[#111b21] dark:text-[#e9edef] pb-1 shadow-[0_1px_1px_rgba(0,0,0,0.1)] text-[15px] relative overflow-hidden" id="msg-bubble-{{ msg.pk }}">
                             
                             <!-- If message contains an image -->
                             {% if msg.image %}
@@ -131,10 +131,10 @@
                         <!-- Dropdown Menu for own messages -->
                         {% if msg.sender == request.user %}
                         <div class="absolute top-0 right-0 mt-1 mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="toggleMsgOptions({{ msg.pk }})" class="text-gray-500 hover:text-gray-800 dark:text-white/70 dark:hover:text-white bg-white/50 dark:bg-black/20 rounded-full p-1 shadow-sm backdrop-blur-sm">
+                            <button onclick="toggleMsgOptions({{ msg.pk }})" class="text-gray-500 hover:text-gray-800 dark:text-white/70 dark:hover:text-white bg-[#ffffff]/50 dark:bg-black/20 rounded-full p-1 shadow-sm backdrop-blur-sm">
                                 <i class="bi bi-chevron-down text-[10px]"></i>
                             </button>
-                            <div id="msg-opts-{{ msg.pk }}" class="hidden absolute right-0 mt-1 w-28 bg-white dark:bg-[#202c33] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 z-50 py-1">
+                            <div id="msg-opts-{{ msg.pk }}" class="hidden absolute right-0 mt-1 w-28 bg-[#ffffff] dark:bg-[#202c33] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 z-50 py-1">
                                 {% if not msg.image %}
                                 <button onclick="openEditModal({{ msg.pk }}, `{{ msg.body|escapejs }}`)" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-[#e9edef] hover:bg-gray-50 dark:hover:bg-[#2a3942]">Edit</button>
                                 {% endif %}
@@ -156,7 +156,7 @@
             </div>
         {% else %}
             <!-- Preview Area for images before sending -->
-            <div id="imagePreviewContainer" class="hidden mb-3 p-3 bg-white dark:bg-[#2a3942] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative">
+            <div id="imagePreviewContainer" class="hidden mb-3 p-3 bg-[#ffffff] dark:bg-[#2a3942] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative">
                 <button type="button" onclick="clearImagePreview()" class="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center">
                     <i class="bi bi-x"></i>
                 </button>
@@ -179,7 +179,7 @@
                     </button>
                 </div>
                 
-                <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-2xl shadow-sm border border-transparent focus-within:border-[#00a884] overflow-hidden">
+                <div class="flex-1 bg-[#ffffff] dark:bg-[#2a3942] rounded-2xl shadow-sm border border-transparent focus-within:border-[#00a884] overflow-hidden">
                     <textarea id="visibleChatInput" class="w-full max-h-32 bg-transparent text-[#111b21] dark:text-[#e9edef] text-[15px] px-4 py-2.5 focus:outline-none resize-none placeholder-gray-500 dark:placeholder-[#8696a0] block" rows="1" placeholder="Type a message"></textarea>
                 </div>
                 
@@ -195,7 +195,7 @@
 <!-- Modals -->
 <!-- Edit Modal -->
 <div id="editModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
-    <div class="bg-white dark:bg-[#202c33] rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
+    <div class="bg-[#ffffff] dark:bg-[#202c33] rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
         <div class="px-5 py-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
             <h3 class="font-semibold text-gray-800 dark:text-white">Edit Message</h3>
             <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -214,7 +214,7 @@
 
 <!-- Report Modal -->
 <div id="reportModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
-    <form method="POST" action="{% url 'messaging:report' other_participant.id %}" class="bg-white dark:bg-[#202c33] rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
+    <form method="POST" action="{% url 'messaging:report' other_participant.id %}" class="bg-[#ffffff] dark:bg-[#202c33] rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
         {% csrf_token %}
         <input type="hidden" name="thread_id" value="{{ active_thread.id }}">
         <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">

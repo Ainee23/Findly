@@ -26,7 +26,7 @@
     </div>
 
     <!-- Notifications List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-[#ffffff] dark:bg-gray-800 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 overflow-hidden">
         {% for note in notes %}
             <a href="{{ note.link|default:'#' }}" class="block group border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {% if not note.is_read %}bg-blue-50/30 dark:bg-blue-900/10{% endif %}">
                 <div class="p-4 sm:p-5 flex items-start space-x-4">
