@@ -7,7 +7,12 @@ from .models import QRScan
 from items.models import Item
 from .utils import make_qr_png
 
-User = get_user_model()  # ✅ Use custom email-based User
+User = get_user_model()
+
+
+def qr_scan(request):
+    """Renders the HTML5 QR Code scanner page."""
+    return render(request, "qr/scan.html")
 
 
 def item_qr(request, item_pk: int):

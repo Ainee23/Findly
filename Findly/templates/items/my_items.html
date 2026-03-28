@@ -5,35 +5,26 @@
 {% block content %}
 
 <style>
-  .item-manage-card {
-    border: 1px solid #e9ecef;
-    border-radius: 16px;
-    overflow: hidden;
-    transition: box-shadow 0.2s, transform 0.2s;
-    background: #fff;
-  }
-  .item-manage-card:hover {
-    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
-    transform: translateY(-2px);
-  }
-  .item-manage-card .thumb {
-    width: 120px;
-    min-width: 120px;
-    height: 120px;
+  .thumb {
+    width: 140px;
+    min-width: 140px;
+    height: 140px;
     object-fit: cover;
-    border-radius: 12px;
+    border-radius: 16px;
+    transition: transform 0.4s ease;
   }
-  .item-manage-card .thumb-placeholder {
-    width: 120px;
-    min-width: 120px;
-    height: 120px;
-    border-radius: 12px;
-    background: #f1f3f5;
+  .glass-card:hover .thumb {
+    transform: scale(1.05);
+  }
+  .thumb-placeholder {
+    width: 140px;
+    min-width: 140px;
+    height: 140px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #adb5bd;
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   .status-badge {
     font-size: 0.72rem;
@@ -68,34 +59,38 @@
   }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-5 mt-2">
   <div>
-    <h2 class="mb-0 fw-bold">My Items</h2>
-    <p class="text-muted small mb-0">{{ items|length }} item{{ items|length|pluralize }} posted</p>
+    <h2 class="mb-1 text-3xl fw-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#6C63FF] to-[#00C9FF]">My Items</h2>
+    <p class="text-gray-500 font-medium small mb-0">{{ items|length }} item{{ items|length|pluralize }} posted</p>
   </div>
-  <a href="{% url 'items:create' %}" class="btn btn-primary rounded-pill fw-semibold shadow"
-     style="padding: 10px 28px; font-size: 0.95rem; letter-spacing: 0.01em;">
+  <a href="{% url 'items:create' %}" class="btn-gradient rounded-xl px-4 py-2 text-[0.95rem]">
     <i class="bi bi-plus-lg me-2"></i>Post New Item
   </a>
 </div>
 
-<div class="d-flex flex-column gap-3">
+<div class="d-flex flex-column gap-4">
   {% for item in items %}
-  <div class="item-manage-card shadow-sm">
-    <div class="d-flex align-items-center gap-3 p-3">
+  <div class="glass-card position-relative !p-0 overflow-hidden group border-0">
+    <!-- Accent Line -->
+    <div class="position-absolute top-0 bottom-0 start-0 w-1 {% if item.status == 'lost' %}bg-gradient-to-b from-red-400 to-rose-500{% elif item.status == 'found' %}bg-gradient-to-b from-emerald-400 to-teal-500{% else %}bg-gray-400{% endif %}"></div>
+
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-4 p-4 ms-2">
 
       <!-- Thumbnail -->
-      {% if item.image %}
-        <img src="{{ item.image.url }}" class="thumb" alt="{{ item.title }}">
-      {% else %}
-        <div class="thumb-placeholder"><i class="bi bi-image"></i></div>
-      {% endif %}
+      <div class="position-relative overflow-hidden rounded-2xl flex-shrink-0 shadow-sm">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" class="thumb" alt="{{ item.title }}">
+        {% else %}
+          <div class="thumb-placeholder bg-gray-100 dark:bg-gray-800 text-gray-400"><i class="bi bi-image"></i></div>
+        {% endif %}
+      </div>
 
       <!-- Info -->
-      <div class="flex-grow-1 min-w-0">
-        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-          <h6 class="mb-0 fw-semibold text-truncate" style="max-width:280px;" title="{{ item.title }}">{{ item.title }}</h6>
-          <span class="status-badge
+      <div class="flex-grow-1 min-w-0 py-1">
+        <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+          <h5 class="mb-0 fw-bold text-truncate text-gray-900 dark:text-white" style="max-width:320px;" title="{{ item.title }}">{{ item.title }}</h5>
+          <span class="status-badge shadow-sm
             {% if item.status == 'lost' %}text-danger bg-danger bg-opacity-10
             {% elif item.status == 'found' %}text-success bg-success bg-opacity-10
             {% elif item.status == 'claimed' %}text-warning text-dark bg-warning bg-opacity-25

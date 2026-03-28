@@ -74,21 +74,3 @@ from django.views.static import serve
 urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
-
-# -- TEMPORARY ENDPOINT TO CREATE ADMIN --
-from django.http import HttpResponse
-def create_admin(request):
-    from core.models import User
-    user, created = User.objects.get_or_create(email="owner@findly.com")
-    user.set_password("findly123")
-    user.is_staff = True
-    user.is_superuser = True
-    user.role = "owner"
-    user.save()
-    if created:
-        return HttpResponse("✅ Admin created! Email: <b>owner@findly.com</b> | Password: <b>findly123</b>")
-    return HttpResponse("✅ Admin password reset to <b>findly123</b>! Please try logging in now at /login/")
-
-urlpatterns += [
-    path("setup-admin-user/", create_admin),
-]

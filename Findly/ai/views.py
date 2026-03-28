@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from items.models import Item, Category
-from .utils import score_match, generate_item_description, suggest_category_for_title
+from .utils import text_similarity, image_similarity, location_similarity, generate_item_description, suggest_category_for_title
 
 def health(request):
     return JsonResponse({"ai": "ok", "note": "heuristic matching active"})
@@ -19,26 +19,29 @@ def ai_match(request, item_id):
     candidates = Item.objects.filter(status=target_status).exclude(id=item.id)
     
     matches = []
-    item_text = f"{item.title} {item.description}"
+    item_text = f"{item.title} {item.description} {item.category.name if item.category else ''}"
+    
     for candidate in candidates:
-        candidate_text = f"{candidate.title} {candidate.description}"
-        text_score = score_match(item_text, candidate_text)
+        candidate_text = f"{candidate.title} {candidate.description} {candidate.category.name if candidate.category else ''}"
         
-        img_score = 0.0
+        # 50% Text Score
+        t_score = text_similarity(item_text, candidate_text) * 0.50
+        
+        # 30% Image Score
+        # Try comparing primary images if both exist
+        i_score = 0.0
         try:
-            from items.models import ItemMatch
-            match = ItemMatch.objects.filter(
-                (Q(item1=item) & Q(item2=candidate)) | 
-                (Q(item1=candidate) & Q(item2=item))
-            ).first()
-            if match:
-                img_score = match.score
+            if item.image and candidate.image:
+                i_score = image_similarity(item.image.path, candidate.image.path) * 0.30
         except Exception:
             pass
             
-        final_score = (text_score * 0.4) + (img_score * 0.6) if img_score > 0 else text_score
+        # 20% Location Score
+        l_score = location_similarity(item.location, candidate.location, item.city, candidate.city) * 0.20
         
-        if final_score > 20: # Keep the threshold realistic
+        final_score = t_score + i_score + l_score
+        
+        if final_score > 25: # Keep the threshold realistic
             matches.append({
                 "id": candidate.id,
                 "title": candidate.title,

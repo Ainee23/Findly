@@ -19,11 +19,13 @@
 </style>
 
 
-<div class="row">
+<div class="row g-4">
     <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
+        <div class="glass-card mb-4 border-0 position-relative overflow-hidden group">
+            <div class="position-absolute top-0 right-0 w-64 h-64 bg-[#6C63FF]/10 rounded-full blur-[60px] -mr-10 -mt-10 pointer-events-none"></div>
+
             {% if item.image or item.additional_images.exists %}
-            <div id="itemImageCarousel" class="carousel slide" data-bs-ride="carousel" style="background: #f8f9fa;">
+            <div id="itemImageCarousel" class="carousel slide rounded-t-3xl overflow-hidden" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     {% if item.image %}
                     <div class="carousel-item active">
@@ -48,10 +50,10 @@
                 {% endif %}
             </div>
             {% endif %}
-            <div class="card-body py-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="card-title mb-0">{{ item.title }}</h2>
-                    <span class="badge {% if item.status == 'lost' %}bg-danger{% elif item.status == 'found' %}bg-success{% elif item.status == 'claimed' %}bg-warning text-dark{% elif item.status == 'returned' %}bg-primary{% else %}bg-secondary{% endif %} fs-6">
+            <div class="p-4 p-md-5 relative z-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-3xl fw-extrabold text-gray-900 dark:text-white mb-0">{{ item.title }}</h2>
+                    <span class="status-badge px-3 py-2 text-sm {% if item.status == 'lost' %}text-danger bg-danger bg-opacity-10{% elif item.status == 'found' %}text-success bg-success bg-opacity-10{% elif item.status == 'claimed' %}text-warning text-dark bg-warning bg-opacity-25{% elif item.status == 'returned' %}text-primary bg-primary bg-opacity-10{% else %}text-secondary bg-secondary bg-opacity-10{% endif %} rounded-pill fw-bold shadow-sm">
                         {{ item.get_status_display }}
                     </span>
                 </div>
@@ -91,16 +93,51 @@
         </div>
 
         {% if verification %}
-            <div class="card shadow-sm mb-4 border-info">
-                <div class="card-header bg-info text-dark fw-bold">
-                    <i class="bi bi-shield-check"></i> Verification Status
-                </div>
-                <div class="card-body">
-                    <p><strong>AI Match Score:</strong> {{ verification.ai_match_score|default:"0" }}%</p>
-                    <p><strong>Finder Confirmed:</strong> {% if verification.finder_confirmed %}<span class="text-success">Yes</span>{% else %}<span class="text-warning">Pending</span>{% endif %}</p>
+            <div class="glass-card mb-4 border-0 position-relative overflow-hidden shadow-lg shadow-cyan-500/10">
+                <div class="position-absolute top-0 bottom-0 start-0 w-1 bg-gradient-to-b from-cyan-400 to-[#00C9FF]"></div>
+                <!-- Glowing Orb Background -->
+                <div class="position-absolute top-1/2 left-1/2 translate-middle w-48 h-48 bg-[#00C9FF]/20 rounded-full blur-[60px] pointer-events-none"></div>
+                
+                <div class="p-4 p-md-5 relative z-10">
+                    <h4 class="fw-bold text-gray-900 dark:text-white mb-4 d-flex align-items-center gap-2 tracking-tight">
+                        <i class="bi bi-robot text-[#00C9FF] fs-3 drop-shadow-md"></i> AI Validation Match
+                    </h4>
+                    
+                    <div class="d-flex flex-column flex-sm-row align-items-center gap-5 mb-4">
+                        <!-- Neon Radial Ring Chart -->
+                        <div class="position-relative flex-shrink-0" style="width: 120px; height: 120px;">
+                            <svg viewBox="0 0 36 36" class="w-100 h-100" style="filter: drop-shadow(0px 4px 10px rgba(0, 201, 255, 0.3));">
+                                <!-- Background Path -->
+                                <path class="text-gray-200 dark:text-gray-700/50" stroke-width="3.5" stroke="currentColor" fill="none"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <!-- Match Percentage Path -->
+                                <path class="text-[#00C9FF]" stroke-width="3.5" stroke-dasharray="{{ verification.ai_match_score|default:'0' }}, 100" stroke-linecap="round" stroke="currentColor" fill="none"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="transition: stroke-dasharray 1s ease-out;"/>
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle text-center mt-1">
+                                <span class="fs-3 fw-black text-gray-900 dark:text-white lh-1">{{ verification.ai_match_score|default:"0" }}<span class="fs-6">%</span></span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p class="mb-3 text-gray-600 dark:text-gray-300 fs-5 leading-relaxed">
+                                Our AI system detected a visual similarity between the submitted images and original reports.
+                            </p>
+                            <p class="mb-0 fw-medium d-flex align-items-center flex-wrap gap-2">
+                                <span class="text-gray-500 text-sm uppercase tracking-wider fw-bold">Verification Status:</span> 
+                                {% if verification.finder_confirmed %}
+                                    <span class="badge bg-success bg-opacity-20 text-success rounded-pill px-3 py-2 border-0 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Match Confirmed</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-20 text-warning text-dark dark:text-warning rounded-pill px-3 py-2 border-0 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> Pending Owner</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
                     
                     {% if user == item.owner and not verification.finder_confirmed %}
-                        <a href="{% url 'items:confirm_owner' verification.pk %}" class="btn btn-success mt-2">I Confirm This Is Mine</a>
+                        <a href="{% url 'items:confirm_owner' verification.pk %}" class="btn-gradient shadow-lg px-5 py-3 rounded-xl fw-bold text-white hover:-translate-y-1 transition-transform d-inline-block border-0 w-100 text-center fs-5">
+                            <i class="bi bi-check-all me-1"></i> I Confirm This Is My Item
+                        </a>
                     {% endif %}
                 </div>
             </div>
@@ -108,15 +145,16 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body text-center">
-                <h5 class="card-title mb-3">Posted by</h5>
+        <div class="glass-card mb-4 border-0 text-center">
+            <div class="position-absolute top-0 right-0 w-32 h-32 bg-indigo-400/10 rounded-full blur-[40px] pointer-events-none"></div>
+            <div class="p-4 p-md-5 relative z-10">
+                <h5 class="fw-bold text-gray-800 dark:text-gray-200 mb-4 tracking-tight uppercase text-sm">Posted by</h5>
                 <img src="https://ui-avatars.com/api/?name={{ item.owner.first_name|default:item.owner.email }}&background=random" class="rounded-circle mb-2" width="80" alt="Avatar">
                 <h6 class="mb-1">{{ item.owner.first_name }} {{ item.owner.last_name }}</h6>
                 <p class="text-muted small mb-3">Joined {{ item.owner.date_joined|date:"M Y" }}</p>
                 
                 <a href="{% url 'reviews:user' item.owner.pk %}" 
-                   class="btn btn-dark btn-sm rounded-pill w-100 mb-3 text-white shadow-sm"
+                   class="btn btn-dark btn-sm rounded-pill w-100 mb-3 text-white shadow-sm hover:-translate-y-1 transition-transform"
                    style="letter-spacing:0.01em;">
                   <i class="bi bi-star-fill me-1 text-warning"></i> View User Reviews
                 </a>
@@ -124,14 +162,14 @@
                 {% if user.is_authenticated and user != item.owner %}
                     <div class="d-grid gap-2 mb-3">
                         <a href="{% url 'messaging:start' item.pk %}" 
-                           class="btn btn-primary rounded-pill fw-semibold"
+                           class="btn-gradient shadow-lg text-white rounded-pill fw-semibold hover:-translate-y-1 transition-transform"
                            style="padding: 9px 0; letter-spacing:0.01em;">
-                          <i class="bi bi-chat-dots-fill me-2"></i>Message {{ item.owner.first_name|default:"Owner" }}
+                          <i class="bi bi-chat-dots-fill me-2"></i> Message
                         </a>
                         
                         {% if item.status in 'lost found' %}
                             <a href="{% url 'items:send_claim' item.pk %}" 
-                               class="btn rounded-pill fw-semibold claim-btn-{% if item.status == 'lost' %}lost{% else %}found{% endif %}"
+                               class="btn rounded-pill fw-semibold {% if item.status == 'lost' %}claim-btn-lost bg-warning{% else %}claim-btn-found bg-success text-white{% endif %} shadow-sm hover:-translate-y-1 transition-transform"
                                style="padding: 9px 0; letter-spacing:0.01em;">
                               <i class="bi bi-hand-index-thumb me-2"></i>
                               {% if item.status == 'lost' %}I Found This{% else %}Claim Item{% endif %}
@@ -140,16 +178,16 @@
                     </div>
 
                 {% if user_claim %}
-                    <div class="alert alert-info mt-3 small">
-                                {% if user_claim.approved and not user_claim.pickup_confirmed %}
+                    <div class="alert alert-info mt-3 small shadow-sm border-0 bg-white/50 backdrop-blur-sm">
+                        {% if user_claim.approved and not user_claim.pickup_confirmed %}
                             <strong>Your claim was approved.</strong> Please coordinate with the owner to arrange pickup.
 
                             <div class="mt-2">
-                                <button id="shareLocationBtn" class="btn btn-sm btn-outline-secondary">Share live location</button>
+                                <button id="shareLocationBtn" class="btn btn-sm btn-outline-primary rounded-pill">Share live location</button>
                                 <span id="shareLocationStatus" class="small text-muted ms-2"></span>
                                 <form id="confirmPickupForm" method="post" action="{% url 'items:confirm_pickup' user_claim.pk %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-success">Confirm pickup</button>
+                                    <button type="submit" class="btn btn-sm btn-success rounded-pill fw-medium shadow-sm">Confirm pickup</button>
                                 </form>
                             </div>
 
@@ -161,108 +199,102 @@
                         {% elif user_claim.pickup_confirmed %}
                             <strong>Pickup confirmed.</strong>
                             <div class="mt-2">
-                                <a href="{% url 'reviews:leave' item.owner.pk %}" class="btn btn-sm btn-outline-primary">Leave a review for the owner</a>
+                                <a href="{% url 'reviews:leave' item.owner.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">Leave a review for the owner</a>
                             </div>
                         {% elif user_claim.rejected %}
-                            <strong>Your claim was rejected.</strong> You can contact the owner by message.
+                            <strong class="text-danger">Your claim was rejected.</strong> You can contact the owner by message.
                         {% elif user_claim.proof_requested %}
-                            <strong>Owner requested more proof.</strong> <a href="{% url 'items:edit_claim' user_claim.pk %}">Update your claim</a>.
+                            <strong class="text-warning">Owner requested more proof.</strong> <a href="{% url 'items:edit_claim' user_claim.pk %}" class="fw-bold">Update your claim</a>.
                         {% else %}
                             <strong>Your claim is pending.</strong> The owner will review and respond soon.
                         {% endif %}
                     </div>
                 {% endif %}
 
-                {% elif user == item.owner %}
+                {% endif %}
+
+                {% if user == item.owner %}
                 <div class="d-grid gap-2 mb-3">
-                    <a href="{% url 'items:edit' item.pk %}" class="btn btn-outline-secondary rounded-pill fw-semibold" style="letter-spacing:0.01em;">
+                    <a href="{% url 'items:edit' item.pk %}" class="btn btn-outline-secondary rounded-pill fw-semibold hover:-translate-y-1 transition-transform" style="letter-spacing:0.01em;">
                         <i class="bi bi-pencil me-1"></i> Edit Item
                     </a>
-                    <a href="{% url 'items:delete' item.pk %}" class="btn btn-outline-danger rounded-pill fw-semibold" style="letter-spacing:0.01em;">
-                        <i class="bi bi-trash me-1"></i> Delete Item
-                    </a>
                 </div>
-                <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small">
-                    <i class="bi bi-info-circle"></i> This is your post.
+                
+                <div class="alert alert-info py-2 px-3 mt-3 mb-0 text-start small border-0 bg-white/50 shadow-sm backdrop-blur-sm">
+                    <i class="bi bi-info-circle text-primary me-1"></i> This is your posted item.
                 </div>
-
 
                 {% if claims %}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <strong>Claims ({{ claims.count }})</strong>
+                <div class="card shadow-sm border-0 mb-4 mt-3 bg-white/80 backdrop-blur-md rounded-xl">
+                    <div class="card-header bg-transparent border-bottom-0 pt-3 pb-0">
+                        <strong class="text-gray-800 fs-6">Claims ({{ claims.count }})</strong>
                     </div>
                     <div class="card-body">
                         {% for claim in claims %}
-                            <div class="border rounded p-2 mb-2">
-                                <div class="d-flex justify-content-between align-items-start">
+                            <div class="border rounded-lg p-3 mb-3 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <strong>{{ claim.sender.get_full_name|default:claim.sender.email }}</strong>
+                                        <strong class="text-gray-900">{{ claim.sender.get_full_name|default:claim.sender.email }}</strong>
                                         <br>
                                         <small class="text-muted">{{ claim.created_at|date:"M d, Y H:i" }}</small>
                                     </div>
-                                    <span class="badge {% if claim.approved %}bg-success{% elif claim.rejected %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    <span class="badge rounded-pill {% if claim.approved %}bg-success{% elif claim.rejected %}bg-danger{% else %}bg-secondary{% endif %} bg-opacity-10 text-{% if claim.approved %}success{% elif claim.rejected %}danger{% else %}secondary{% endif %} fw-bold px-3 py-2 border-0">
                                         {% if claim.approved %}Approved{% elif claim.rejected %}Rejected{% elif claim.proof_requested %}Proof requested{% else %}Pending{% endif %}
                                     </span>
                                 </div>
 
                                 {% if claim.approved and claim.finder_lat and claim.finder_lng %}
-                                    <div class="mb-2">
-                                        <small class="text-muted">Finder last location: {{ claim.finder_lat }}, {{ claim.finder_lng }}{% if claim.finder_location_updated_at %} (updated {{ claim.finder_location_updated_at|timesince }} ago){% endif %}</small>
+                                    <div class="mb-2 bg-gray-50 p-2 rounded">
+                                        <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Finder last location: {{ claim.finder_lat }}, {{ claim.finder_lng }}{% if claim.finder_location_updated_at %} (updated {{ claim.finder_location_updated_at|timesince }} ago){% endif %}</small>
                                     </div>
                                 {% endif %}
 
                                 {% if claim.message %}
-                                    <p class="mb-1 mt-2">{{ claim.message|linebreaksbr }}</p>
+                                    <p class="mb-2 mt-2 text-gray-700 bg-gray-50 p-2 rounded border border-gray-100">{{ claim.message|linebreaksbr }}</p>
                                 {% endif %}
 
                                 {% if claim.proof_image %}
                                     <div class="mb-2">
-                                        <strong>Proof image:</strong><br>
-                                        <img src="{{ claim.proof_image.url }}" class="img-fluid" style="max-height:180px;" />
+                                        <strong class="small text-gray-500 uppercase tracking-wider">Proof image:</strong><br>
+                                        <img src="{{ claim.proof_image.url }}" class="img-fluid rounded shadow-sm mt-1" style="max-height:180px;" />
                                     </div>
                                 {% endif %}
 
                                 {% if claim.proof_document %}
                                     <div class="mb-2">
-                                        <strong>Proof file:</strong> <a href="{{ claim.proof_document.url }}" target="_blank">Download</a>
+                                        <strong class="small text-gray-500 uppercase tracking-wider">Proof file:</strong> 
+                                        <a href="{{ claim.proof_document.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-1"><i class="bi bi-download me-1"></i>Download</a>
                                     </div>
                                 {% endif %}
 
                                 {% if claim.owner_response %}
-                                    <div class="alert alert-warning py-2">
-                                        <strong>Owner note:</strong> {{ claim.owner_response|linebreaksbr }}
+                                    <div class="alert alert-warning py-2 mt-2 border-0 bg-warning bg-opacity-10 text-dark">
+                                        <strong>Your note:</strong> {{ claim.owner_response|linebreaksbr }}
                                     </div>
                                 {% endif %}
 
                                 {% if not claim.approved and not claim.rejected %}
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <a href="{% url 'items:accept_claim' claim.pk %}" class="btn btn-sm btn-success">Approve</a>
-                                        <a href="{% url 'items:reject_claim' claim.pk %}" class="btn btn-sm btn-danger">Reject</a>
+                                    <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top border-gray-100">
+                                        <a href="{% url 'items:accept_claim' claim.pk %}" class="btn btn-sm btn-success rounded-pill fw-medium shadow-sm hover:-translate-y-1 transition-transform">Approve</a>
+                                        <a href="{% url 'items:reject_claim' claim.pk %}" class="btn btn-sm btn-outline-danger rounded-pill fw-medium">Reject</a>
 
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#request-proof-{{ claim.pk }}">Request Proof</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill fw-medium" data-bs-toggle="collapse" data-bs-target="#request-proof-{{ claim.pk }}">Request Proof</button>
                                     </div>
 
                                     <div class="collapse mt-2" id="request-proof-{{ claim.pk }}">
-                                        <form method="post" action="{% url 'items:request_claim_proof' claim.pk %}">
+                                        <form method="post" action="{% url 'items:request_claim_proof' claim.pk %}" class="bg-gray-50 p-3 rounded mt-2">
                                             {% csrf_token %}
                                             <div class="mb-2">
-                                                <textarea name="owner_response" class="form-control form-control-sm" rows="2" placeholder="Ask for a photo, receipt, or other proof">{{ claim.owner_response }}</textarea>
+                                                <textarea name="owner_response" class="form-control form-control-sm border-0 shadow-sm" rows="2" placeholder="Ask for a photo, receipt, or other proof">{{ claim.owner_response }}</textarea>
                                             </div>
-                                            <button class="btn btn-sm btn-primary">Send request</button>
+                                            <button class="btn btn-sm btn-primary rounded-pill shadow-sm">Send request</button>
                                         </form>
                                     </div>
                                 {% endif %}
 
-                                {% if user_claim and user_claim.pk == claim.pk and not claim.approved and not claim.rejected %}
-                                    <div class="mt-2">
-                                        <a href="{% url 'items:edit_claim' claim.pk %}" class="btn btn-sm btn-outline-primary">Update Claim</a>
-                                    </div>
-                                {% endif %}
-
                                 {% if claim.pickup_confirmed %}
-                                    <div class="mt-2">
-                                        <a href="{% url 'reviews:leave' claim.sender.pk %}" class="btn btn-sm btn-outline-primary">Leave a review for the finder</a>
+                                    <div class="mt-3 pt-3 border-top border-gray-100">
+                                        <a href="{% url 'reviews:leave' claim.sender.pk %}" class="btn btn-sm btn-gradient rounded-pill text-white shadow-sm fw-medium">Leave a review for the finder</a>
                                     </div>
                                 {% endif %}
                             </div>
@@ -271,31 +303,46 @@
                 </div>
                 {% endif %}
 
-                {% else %}
-                <div class="d-grid mt-3">
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary">Login to Contact</a>
-                </div>
                 {% endif %}
             </div>
 
-            <!-- QR Code button — visible to everyone -->
+            <!-- QR Code button -->
             <div class="text-center mt-3 mb-2">
-                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3"
+                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 shadow-sm hover:-translate-y-1 transition-transform"
                         data-bs-toggle="modal" data-bs-target="#itemQrModal">
                     <i class="bi bi-qr-code me-1"></i> Get QR Code
                 </button>
             </div>
         </div>
+
+        <!-- AI Match Dynamic Container -->
+        <div id="aiMatchContainer" class="d-none">
+            <div class="glass-card mb-4 border-0 position-relative overflow-hidden shadow-lg shadow-purple-500/10 border-t-4 border-t-[#6C63FF]">
+                <div class="position-absolute top-0 right-0 w-32 h-32 bg-[#6C63FF]/20 rounded-full blur-[40px] pointer-events-none"></div>
+                <div class="p-4 relative z-10">
+                    <h5 class="fw-bold text-gray-900 dark:text-white mb-3 d-flex align-items-center gap-2 tracking-tight">
+                        <i class="bi bi-magic text-[#6C63FF] fs-4"></i> Smart AI Matches
+                    </h5>
+                    <div id="aiMatchList" class="d-flex flex-column gap-3">
+                        <!-- Matches injected here via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
+{% endblock %}
+
+{% block modals %}
 <!-- Item QR Modal -->
-<div class="modal fade" id="itemQrModal" tabindex="-1" aria-label="Item QR Code">
+<div class="modal fade" id="itemQrModal" tabindex="-1" aria-labelledby="itemQrModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center p-4">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title w-100"><i class="bi bi-qr-code"></i> QR Code for "{{ item.title }}"</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title w-100" id="itemQrModalLabel"><i class="bi bi-qr-code"></i> QR Code for "{{ item.title }}"</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <img src="{% url 'qr:item' item.pk %}" alt="Item QR Code" class="img-fluid border rounded p-2 shadow-sm" style="max-width:220px;">
@@ -305,7 +352,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
 <script>
     (function() {
         const btn = document.getElementById('updateLocationBtn');
@@ -392,6 +441,40 @@
                 stopLiveTracking();
             }
         });
+        
+        // --- Smart AI Match Fetch Script ---
+        const itemStatus = "{{ item.status }}";
+        if (itemStatus === "lost" || itemStatus === "found") {
+            fetch(`/ai/match/{{ item.pk }}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.matches && data.matches.length > 0) {
+                        const container = document.getElementById('aiMatchContainer');
+                        const list = document.getElementById('aiMatchList');
+                        container.classList.remove('d-none');
+                        
+                        data.matches.forEach(match => {
+                            let glowClass = match.score > 75 ? "text-danger" : (match.score > 50 ? "text-warning" : "text-info");
+                            let fireIcon = match.score > 75 ? "🔥" : "✨";
+                            
+                            const html = `
+                            <a href="${match.url}" class="text-decoration-none">
+                                <div class="bg-white/50 backdrop-blur-sm border rounded-xl p-3 d-flex justify-content-between align-items-center hover:-translate-y-1 transition-transform shadow-sm">
+                                    <div class="text-truncate flex-grow-1 pe-2">
+                                        <h6 class="mb-1 fw-bold text-gray-800 text-truncate">${match.title}</h6>
+                                        <small class="text-muted d-block">Potential match found</small>
+                                    </div>
+                                    <div class="badge bg-white shadow-sm rounded-pill px-3 py-2 fw-black fs-6 ${glowClass} border border-opacity-25 border-current">
+                                        ${fireIcon} ${match.score}%
+                                    </div>
+                                </div>
+                            </a>`;
+                            list.insertAdjacentHTML('beforeend', html);
+                        });
+                    }
+                })
+                .catch(err => console.error("Error fetching AI Matches:", err));
+        }
     })();
 </script>
 
