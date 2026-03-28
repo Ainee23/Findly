@@ -279,12 +279,16 @@
         <header class="h-20 flex items-center justify-between px-6 sm:px-10 bg-[#fcfcfc] dark:bg-gray-800 z-10 flex-shrink-0 transition-colors duration-300">
             <div class="flex items-center flex-1">
                 {% if user.is_authenticated %}
-                <button id="openSidebarBtn" class="md:hidden mr-6 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none rounded-full transition-colors">
+                <button id="openSidebarBtn" class="md:hidden mr-4 sm:mr-6 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none rounded-full transition-colors">
                     <i class="bi bi-list text-2xl"></i>
                 </button>
                 {% else %}
-                <a href="{% url 'dashboard:home' %}" class="text-xl font-bold tracking-tight text-indigo-500 dark:text-indigo-400 mr-10">Findly</a>
+                <a href="{% url 'dashboard:home' %}" class="text-xl font-bold tracking-tight text-indigo-500 dark:text-indigo-400 mr-6">Findly</a>
                 {% endif %}
+                
+                <button onclick="history.back()" class="mr-4 sm:mr-6 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200" title="Go Back">
+                    <i class="bi bi-arrow-left text-[17px]"></i>
+                </button>
                 
                 <!-- Search Bar -->
                 <div class="hidden sm:flex max-w-lg w-full relative group">
