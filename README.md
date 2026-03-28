@@ -1,153 +1,155 @@
 # Findly 🔍
 
-A full-stack Django web application for **lost & found item tracking**, featuring real-time messaging, AI-powered matching, QR code scanning, notifications, and a modern responsive UI.
+> **A smart Lost & Found platform** — connecting people who've lost items with those who've found them, powered by AI matching, QR codes, and real-time location sharing.
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-findly--4usu.onrender.com-6C63FF?style=for-the-badge)](https://findly-4usu.onrender.com)
+[![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-- 🔐 **Email-based authentication** with OTP verification
-- 📦 **Item Management**: Listing, browsing, search, and claim requests
-- 💬 **Real-time Messaging**: WhatsApp-style interface with edit & delete support natively without page reloads
-- 🔔 **Live Notifications**: Alerts for messages, claims, and system events
-- 📊 **Dashboards**: Comprehensive overview panels with metrics for standard users and administrators
-- ⭐ **Reviews & Ratings**: Fostering continuous trust and safety on the platform
-- 📷 **QR Code Integration**: Generation and scanning for items and profiles
-- 🤖 **AI-powered Engine**: Smart suggestions and computational views
-- 🌗 **UI & Accessibility**: Modern "TheyMakeDesign" soft, airy aesthetic with Dark mode / Light mode support
+| Feature | Description |
+|---|---|
+| 🤖 **AI Smart Matching** | Multi-factor similarity scoring (text + image + location) using TF-IDF and perceptual hashing |
+| 📷 **QR Code System** | Generate & scan QR codes for items and user profiles |
+| 📍 **Live Location Sharing** | Real-time GPS tracking between claimant and owner during pickup |
+| 🔐 **OTP Email Verification** | Secure account registration with Gmail SMTP OTP |
+| 💬 **Messaging System** | In-app direct messaging between users |
+| 📊 **Admin Dashboard** | Platform-wide stats, item management, and user oversight |
+| 🌙 **Dark Mode** | Full light/dark theme toggle with persistent preference |
+| ☁️ **Cloud Media Storage** | Cloudinary CDN for persistent image uploads |
+| 🗺️ **Map View** | Interactive map showing all item locations |
+| ⭐ **Review System** | Leave reviews for owners and finders after item return |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | Django 6.0.2, Django REST Framework |
-| **Database** | PostgreSQL (local) / Render PostgreSQL (production) |
-| **Storage** | WhiteNoise (static) + Django MEDIA (uploads) |
-| **Auth** | Custom User model (email-based) |
-| **Email** | Gmail SMTP via App Password |
-| **Deployment** | Render + Gunicorn |
-| **Frontend** | Tailwind CSS (via CDN), Bootstrap Icons, Inter Font |
+- **Backend:** Django 6.0, Django REST Framework
+- **Database:** PostgreSQL (local) / Render PostgreSQL (production)
+- **Frontend:** HTML, Bootstrap 5, Tailwind CSS, Vanilla JS
+- **AI Matching:** ImageHash (perceptual hashing), difflib (text similarity)
+- **Media Storage:** Cloudinary CDN
+- **Static Files:** WhiteNoise
+- **Deployment:** Render (Web Service + PostgreSQL)
+- **Email:** Gmail SMTP (OTP verification)
 
 ---
 
-## 📁 Core Application Architecture
+## 🚀 Local Setup
 
-The project is organized into modular Django apps to separate concerns efficiently:
+### Prerequisites
+- Python 3.11+
+- PostgreSQL
+- Git
 
-- **`accounts/`**: Handles all user authentication models and views. Uses a custom User model (email as primary identifier).
-- **`items/`**: The core application. Users can browse items, search for specific listings, list their own items, and submit claim requests.
-- **`messaging/`**: A robust chat engine enabling direct user-to-user communication. Features speech bubbles, async editing, and native deletion.
-- **`notifications/`**: A centralized alerting system delivering dynamically rendered notification cards.
-- **`dashboard/`**: Provides comprehensive overview panels indicating recent activity for both users and admins.
-- **`reviews/`**: Allows users to leave feedback, ratings, and comments.
-- **`qr/`**: Integrates QR code generation and scanning directly into the application.
-- **`ai/`**: A dedicated application for AI-powered features and deep integrations.
-- **`core/`**: Contains the foundational templates, fallback views, and standard site logic.
-
----
-
-## 🎨 UI / UX Design Principles
-
-- Uses a unified **"TheyMakeDesign"** soft, airy aesthetic.
-- **Tailwind CSS** is the primary styling engine, leveraging utility-first classes.
-- **Dark Mode and Light Mode** are fully supported locally via local storage and system preference detection.
-- **Dynamic JavaScript features** (like Edit/Delete modals) utilize asynchronous JSON Fetch API requests without complex dependencies.
-
----
-
-## ⚙️ Local Setup
-
-### 1. Clone and create virtual environment
+### 1. Clone & Install
 ```bash
-git clone <your-repo-url>
-cd Findly
+git clone https://github.com/yourusername/findly.git
+cd findly
 python -m venv venv
 venv\Scripts\activate        # Windows
-source venv/bin/activate     # Mac/Linux
-```
-
-### 2. Install dependencies
-```bash
+# source venv/bin/activate   # Mac/Linux
 pip install -r requirements.txt
 ```
 
-### 3. Create `.env` file inside `Findly/` (next to `manage.py`)
+### 2. Configure Environment
+Create a `.env` file in the project root:
 ```env
-SECRET_KEY=your-secret-key
+SECRET_KEY=your-django-secret-key
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+DB_PASSWORD=your-postgres-password
 
+# Email (Gmail SMTP)
 EMAIL_HOST_USER=your@gmail.com
-EMAIL_HOST_PASSWORD=your_16_digit_app_password
+EMAIL_HOST_PASSWORD=your-app-password
 
-DB_PASSWORD=your_postgres_password
-
-# On Render only:
-# DATABASE_URL=postgres://user:pass@host/dbname
+# Cloudinary (optional for local dev)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-### 4. Apply migrations and run
+### 3. Run Migrations & Start
 ```bash
-cd Findly
-python manage.py makemigrations
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-> ✅ If using `venv`, make sure it's activated, or run `..\venv\Scripts\python manage.py <command>`.
+Visit: http://127.0.0.1:8000
 
 ---
 
-## 📧 Gmail SMTP Setup
+## 🌐 Deployment (Render)
 
-To send real verification emails:
-1. Enable **2-Step Verification** on your Google account
-2. Go to https://myaccount.google.com/apppasswords
-3. Generate an App Password (16 characters)
-4. Set it as `EMAIL_HOST_PASSWORD` in your `.env`
+### Required Environment Variables on Render
 
----
-
-## ☁️ Render Deployment
-
-### Environment Variables to set in Render:
-| Variable | Value |
-|----------|-------|
-| `SECRET_KEY` | Your Django secret key |
-| `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `findly.onrender.com` |
-| `EMAIL_HOST_USER` | Your Gmail address |
+| Variable | Description |
+|---|---|
+| `SECRET_KEY` | Django secret key |
+| `DATABASE_URL` | Auto-set by Render PostgreSQL |
+| `EMAIL_HOST_USER` | Gmail address for OTP emails |
 | `EMAIL_HOST_PASSWORD` | Gmail App Password |
-| `DATABASE_URL` | Render PostgreSQL URL |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary dashboard → Cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary dashboard → API Key |
+| `CLOUDINARY_API_SECRET` | Cloudinary dashboard → API Secret |
 
-### Build & Start Commands:
+### Build Command
 ```bash
-# Build command:
-pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
+pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+```
 
-# Start command:
-gunicorn Findly.wsgi:application
+### Start Command
+```bash
+gunicorn Findly.wsgi:application --bind 0.0.0.0:$PORT
 ```
 
 ---
 
-## 📋 Pre-Deploy Checklist
+## 📁 Project Structure
 
-- [ ] Login & register working
-- [ ] Email verification working
-- [ ] Image uploads working (profile, item, QR)
-- [ ] Chat (send, edit, delete) working
-- [ ] Notifications working
-- [ ] Dashboard loading correctly
-- [ ] Admin panel accessible
-- [ ] PostgreSQL connected
-- [ ] `DEBUG=False` on production
-- [ ] `.env` added to `.gitignore` ✅
+```
+Findly/
+├── accounts/        # User auth, OTP, profiles
+├── ai/              # Smart matching engine (text + image similarity)
+├── core/            # Custom User model, middleware, home views
+├── dashboard/       # Admin & user dashboards
+├── items/           # Item CRUD, claims lifecycle, map
+├── messaging/       # Direct messaging between users
+├── notifications/   # In-app notification system
+├── qr/              # QR code generation & scanning
+├── reviews/         # Star ratings & reviews
+├── templates/       # All HTML templates
+├── static/          # CSS, JS, images
+└── media/           # Local uploads (replaced by Cloudinary in production)
+```
 
 ---
 
-## 👩‍💻 Author
+## 🔄 Claim Lifecycle
 
-**Ainee Makwana** — Final Year Project, 2026
+```
+User finds item → Submits claim (with proof) → Owner reviews
+      ↓                                              ↓
+Owner requests more proof          Owner approves (or rejects)
+                                          ↓
+                              Claimant shares live GPS location
+                                          ↓
+                              Claimant clicks "Confirm Pickup"
+                                          ↓
+                              Both users leave reviews ⭐
+```
+
+---
+
+## 📄 License
+
+This project was built as a college project. Feel free to use it as inspiration.
+
+---
+
+*Built with ❤️ using Django + Bootstrap + Cloudinary*
